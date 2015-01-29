@@ -79,7 +79,6 @@ www.huffingtonpost.com/%Y/
 www.ibtimes.co.uk/%W-
 www.independent.co.uk/%N/%W
 www.irishtimes.com/%N/%W
-www.israelnationalnews.com/news/%W/
 www.itv.com/%W/%Y
 www.jpost.com/%N/%W
 www.ktvu.com/%W-
@@ -136,3 +135,7 @@ www.nzherald.co.nz/%W/article.cfm
 www.torontosun.com/%Y/
 www.usatoday.com/%W/%Y/
 www.washingtonpost.com/%W/%Y/
+www.ynetnews.com/articles/%W.html
+www.timesofisrael.com/[^\\-/]+-[^\\-/]+-[^\\-/]+-%N/
+www.jpost.com/%N/%A(-|=)\d\d\d\d\d
+www.israelnationalnews.com/News/News.aspx/

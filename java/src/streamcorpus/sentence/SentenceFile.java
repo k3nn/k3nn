@@ -1,7 +1,7 @@
 package streamcorpus.sentence;
 
-import io.github.repir.tools.Content.Datafile;
-import io.github.repir.tools.hadoop.Structured.File;
+import io.github.repir.tools.io.Datafile;
+import io.github.repir.tools.hadoop.tsv.File;
 
 /**
  *

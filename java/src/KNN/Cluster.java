@@ -1,11 +1,11 @@
 package KNN;
 
-import io.github.repir.tools.Collection.HashMapDouble;
-import io.github.repir.tools.Lib.Log;
-import static io.github.repir.tools.Lib.PrintTools.sprintf;
-import io.github.repir.tools.Lib.Profiler;
-import io.github.repir.tools.Type.Tuple2;
+import io.github.repir.tools.collection.HashMapDouble;
+import io.github.repir.tools.lib.Log;
+import static io.github.repir.tools.lib.PrintTools.sprintf;
+import io.github.repir.tools.type.Tuple2;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,71 +16,74 @@ import java.util.Map;
  *
  * @author jeroen
  */
-public class Cluster {
+public class Cluster<U extends Url> {
 
     public static final Log log = new Log(Cluster.class);
     public static final int K = 3;
     public static final int BREAKTIE = K / 2;
-    public static HashMap<Integer, Cluster> clusters = new HashMap();
-    public static int watch = -1;
-    static int idd = 0;
-    int id = idd++;
-    private ArrayList<Url> urls = new ArrayList();
-    private ArrayList<Url> base = new ArrayList();
-    public final Url dummy;
+    private Stream stream;
+    private static HashSet<Integer> watchlist = new HashSet(Arrays.asList());
+    public final boolean watch;
+    final int id;
+    private ArrayList<U> urls = new ArrayList();
+    private HashSet<U> base = new HashSet();
 
-    public Cluster(Collection<Url> base) {
+    Cluster(Stream stream, int id, Collection<U> base) {
+        this.id = id;
+        this.stream = stream;
         setBase(base);
         for (Url u : base) {
             u.setCluster(this);
         }
-
-        clusters.put(id, this);
-        dummy = new UrlM(this);
+        watch = false; //watch(this);
+        if (watch) {
+            log.info("create %d", id);
+            for (Url u : base) {
+                log.info("base %d %s %s", u.getID(), u.getNN(), u.getScore());
+            }
+        }
     }
 
-    public Cluster(int id) {
+    Cluster(Stream stream, int id) {
+        this.stream = stream;
         this.id = id;
-        idd = Math.max(id + 1, idd);
-        clusters.put(id, this);
-        if (id == watch) {
+        watch = watch(this);
+        if (watch) {
             log.info("create %d", id);
         }
-        dummy = new UrlM(this);
-    }
-    
-    public static Cluster get(int id) {
-        return clusters.get(id);
     }
 
-    public static Collection<Cluster> getClusters() {
-        return clusters.values();
+    private static boolean watch(Cluster c) {
+        return (watchlist.contains(c.getID()));
     }
 
-    public void setBase(Collection<Url> base) {
+    public void setBase(Collection<? extends Url> base) {
         if (base.size() == 2) {
             //log.crash();
         }
-        this.base = new ArrayList(base);
+        this.base = new HashSet(base);
     }
 
     public boolean recheckBase() {
         HashSet<Url> base = getBase(urls);
-        if (id == watch) {
+        if (watch) {
             log.info("reBase %s", base);
         }
         if (base.isEmpty()) {
+            stream.changedclusters.add(id);
             this.base.clear();
+            ArrayList<U> urls = new ArrayList(this.urls);
             for (Url u : urls) {
                 u.setCluster(null);
             }
-            Cluster.clusters.remove(id);
-            if (id == watch) {
-               log.info("reBase remove cluster %s", base);
+            stream.remove(this);
+            if (watch) {
+                log.info("reBase remove cluster %s", base);
             }
             return false;
         } else {
             if (!base.equals(this.base)) {
+                stream.changedclusters.add(id);
                 setBase(base);
             }
             return true;
@@ -91,7 +94,9 @@ public class Cluster {
         return id;
     }
 
-    public void addUrl(Url url) {
+    public void addUrl(U url) {
+        if (url.watch)
+            log.info("Add Url %d to cluster %d", url.getID(), getID());
         if (urls.contains(url)) {
             log.info("Cluster %d", getID());
             for (Url u : urls) {
@@ -99,23 +104,28 @@ public class Cluster {
             }
             log.fatal("duplicate cluster %d url %d", id, url.getID());
         }
+        stream.changedclusters.add(id);
         urls.add(url);
-        if (id == watch) {
-            //log.info("addUrl %d freq %d", url.id, url.getFrequency());
+        if (watch) {
+            log.info("addUrl cluster %d url %d", id, url.getID());
         }
     }
-    
-    public void addUrlDontCheck(Url url) {
+
+    public void addUrlDontCheck(U url) {
         if (!urls.contains(url)) {
-           urls.add(url);
+            if (watch) {
+                log.info("addUrlDontCheck cluster %d url %d", id, url.getID());
+            }
+            stream.changedclusters.add(id);
+            urls.add(url);
         }
     }
-    
-    public ArrayList<Url> getUrls() {
+
+    public ArrayList<U> getUrls() {
         return urls;
     }
 
-    public ArrayList<Url> getBase() {
+    public HashSet<U> getBase() {
         return base;
     }
 
@@ -140,58 +150,14 @@ public class Cluster {
     }
 
     public void remove(Url url) {
-            getUrls().remove(url);
-    }
-    
-    public void remove(final Url url, HashSet<Url> changed) {
-        Profiler.startTime("remove");
-        if (id == watch) {
-            log.info("remove %d url %d", id, url.getID());
+        if (watch || url.watch) {
+            log.info("remove cluster %d url %d", id, url.getID());
         }
-        HashSet<Url> linked = new HashSet();
-        HashSet<Url> newlinked = new HashSet() {
-            {
-                add(url);
-            }
-        };
-        while (!newlinked.isEmpty()) {
-            urls.removeAll(newlinked);
-            linked.addAll(newlinked);
-            newlinked = linkedToNoBase(newlinked);
-        }
-        for (Url entry : linked) {
-            if (id == watch) {
-                log.info("remove linked url %d", url.getID());
-            }
-            if (!changed.contains(entry)) {
-//                if (entry == Stream.watch) {
-//                    log.info("removed %d %d %s", id, size(), entry.url);
-//                }
-                changed.add(entry);
-                entry.setCluster(null);
-            }
-        }
-        if (id == watch) {
-            log.info(urls);
-            log.crash();
-        }
-        Profiler.addTime("remove");
+        stream.changedclusters.add(id);
+        getUrls().remove(url);
     }
 
-    public static void addMajority(HashSet<Url> urls) {
-        Iterator<Url> iter = urls.iterator();
-        while (iter.hasNext()) {
-            Url u = iter.next();
-            Cluster c = u.majority();
-            if (c != null) {
-                u.setCluster(c);
-                iter.remove();
-            }
-        }
-    }
-    
-    
-    static class Url2 extends HashMap<Url, HashSet<Url>> {
+    static class Url2<Url> extends HashMap<Url, HashSet<Url>> {
 
         void addEdge(Url url, Url edge) {
             HashSet<Url> list = get(url);
@@ -204,28 +170,28 @@ public class Cluster {
     }
 
     public static final HashSet<Url> emptylist = new HashSet();
-    
-    public static HashSet<Url> getBase(Collection<Url> base) {
-        Profiler.startTime("getBase");
+
+    public static HashSet<Url> getBase(Collection<? extends Url> base) {
         HashSet<Url> result = new HashSet(base);
-        Url2 edges = new Url2();
+        Url2<Url> edges = new Url2();
         HashSet<Url> remove1 = new HashSet(base);
         for (Url u : result) {
             for (int e = 0; e < u.edges; e++) {
                 Edge edge = u.getNN(e);
                 Url to = edge.getUrl();
-                if (to.getID() > u.getID() && result.contains(to) && to.linkedTo(u)) {
-                    edges.addEdge(u, to);
-                    edges.addEdge(to, u);
-                    remove1.remove(to);
-                    remove1.remove(u);
+                if (to != null) {
+                    if (to.getID() > u.getID() && result.contains(to) && to.linkedTo(u)) {
+                        edges.addEdge(u, to);
+                        edges.addEdge(to, u);
+                        remove1.remove(to);
+                        remove1.remove(u);
+                    }
                 }
             }
         }
 
         if (remove1.size() > 0) {
             if (result.size() - remove1.size() <= Cluster.BREAKTIE) {
-                Profiler.addTime("getBase");
                 return emptylist;
             }
             result.removeAll(remove1);
@@ -236,7 +202,6 @@ public class Cluster {
             for (Map.Entry<Url, HashSet<Url>> next : edges.entrySet()) {
                 if (next.getValue().size() <= Cluster.BREAKTIE) {
                     if (result.size() <= Cluster.BREAKTIE + 1) {
-                        Profiler.addTime("getBase");
                         return emptylist;
                     }
                     result.remove(next.getKey());
@@ -255,17 +220,18 @@ public class Cluster {
             }
             remove = new ArrayList();
         }
-        Profiler.addTime("getBase");
-        if (result.size() < Cluster.K)
+        if (result.size() < Cluster.K) {
             return emptylist;
+        }
         return result;
     }
 
     public long getCreationTime() {
         long creationtime = Long.MAX_VALUE;
         for (Url url : urls) {
-            if (url.getAvgScore() >= .5)
-               creationtime = Math.min(creationtime, url.getCreationTime());
+            if (url.getAvgScore() >= .5) {
+                creationtime = Math.min(creationtime, url.getCreationTime());
+            }
         }
         return creationtime;
     }
@@ -273,18 +239,26 @@ public class Cluster {
     public long getLastCreationTime() {
         long creationtime = Long.MIN_VALUE;
         for (Url url : urls) {
-            if (url.getAvgScore() >= .5)
-               creationtime = Math.max(creationtime, url.getCreationTime());
+            if (url.getAvgScore() >= .5) {
+                creationtime = Math.max(creationtime, url.getCreationTime());
+            }
         }
         return creationtime;
     }
 
     public double getAvgBaseScore() {
         double basescore = 0;
+        int count = 0;
         for (Url u : getBase()) {
-            basescore += u.getNN(Cluster.BREAKTIE).getScore();
+            for (int i = 0; i < u.getEdges(); i++) {
+                Edge e = u.getNN(i);
+                if (getBase().contains(e.url)) {
+                    basescore += e.getScore();
+                    count++;
+                }
+            }
         }
-        basescore /= getBase().size();
+        basescore /= count;
         return basescore;
     }
 
@@ -311,17 +285,18 @@ public class Cluster {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(sprintf("\ncluster [%d] ", urls.size()));
-        for (int i = 0; i < urls.size(); i++) {
-            sb.append("\n").append(urls.get(i).toString());
-        }
-        return sb.toString();
+        return Integer.toString(id);
+//        StringBuilder sb = new StringBuilder();
+//        sb.append(sprintf("\ncluster %d [%d] ", getID(), urls.size()));
+//        for (Url url : urls) {
+//            sb.append("\n").append(urls.toString());
+//        }
+//        return sb.toString();
     }
 
     public String evalall() {
         StringBuilder sb = new StringBuilder();
-        sb.append(eval()).append("\n-----");
+        sb.append(eval()).append("\n-----\n");
         HashSet<Url> covered = new HashSet(getBase());
         HashSet<Url> todo = new HashSet(getUrls());
         todo.removeAll(covered);
@@ -333,31 +308,34 @@ public class Cluster {
                 Url u = iter.next();
                 int count = 0;
                 for (int i = 0; i < u.edges; i++) {
-                    if (covered.contains(u.getNN(i).url))
+                    Url nn = u.getNN(i).getUrl();
+                    if (nn != null && covered.contains(nn)) {
                         count++;
+                    }
                 }
                 if (count > Cluster.BREAKTIE) {
                     iter.remove();
                     covered.add(u);
+                    sb.append(u.getID()).append(": ");
                     addEval(sb, u);
                 }
             }
         }
         if (todo.size() > 0) {
-            sb.append("\n---- misplaced ---");
+            sb.append("\n---- misplaced ---\n");
             for (Url u : todo) {
+                sb.append(u.getID()).append(": ");
                 addEval(sb, u);
             }
         }
         return sb.toString();
     }
-    
+
     public String eval() {
         StringBuilder sb = new StringBuilder();
         sb.append(sprintf("CLUSTER %d size=%d\n", id, urls.size()));
-        for (int v = 0; v < base.size(); v++) {
-            Url u = base.get(v);
-            sb.append(urls.indexOf(u)).append(":");
+        for (Url u : base) {
+            sb.append(u.getID()).append(":");
             addEval(sb, u);
         }
         return sb.toString();
@@ -367,15 +345,16 @@ public class Cluster {
         LOOP:
         for (Edge edge : new EdgeIterator(u)) {
             Url l = edge.getUrl();
-            for (int j = 0; j < urls.size(); j++) {
-                if (urls.get(j) == l) {
-                    sb.append(j).append(" ");
-                    continue LOOP;
-                }
+            if (l != null) {
+                sb.append(l.getID()).append(" ");
+            } else {
+                sb.append("x ");
             }
-            sb.append("x ");
         }
-        sb.append(" ").append(u.toString()).append(" ").append(u.getAvgScore()).append("\n");
+        for (Edge edge : new EdgeIterator(u)) {
+            sb.append(edge.score).append(" ");
+        }
+        sb.append("\n");
     }
 
     public String represent() {

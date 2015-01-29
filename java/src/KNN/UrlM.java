@@ -1,6 +1,6 @@
 package KNN;
 
-import io.github.repir.tools.Lib.Log;
+import io.github.repir.tools.lib.Log;
 import java.util.Collection;
 
 /**
@@ -10,7 +10,7 @@ import java.util.Collection;
 public class UrlM extends Url {
 
     static Log log = new Log(UrlM.class);
-    //static long start2014 = DateTimeTools.toDate(2014, 0, 1).getTime()/1000;
+    //static long start2014 = DateTools.toDate(2014, 0, 1).getTime()/1000;
     protected int featureCount;
     
     protected UrlM(Cluster cluster) {

@@ -1,6 +1,6 @@
 package Cluster;
 
-import io.github.repir.tools.hadoop.Structured.OutputFormat;
+import io.github.repir.tools.hadoop.io.OutputFormat;
 /**
  *
  * @author jeroen

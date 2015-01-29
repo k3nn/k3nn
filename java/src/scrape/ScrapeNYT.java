@@ -1,9 +1,9 @@
 package scrape;
 
-import io.github.repir.tools.ByteSearch.ByteSearch;
-import io.github.repir.tools.Lib.Log;
+import io.github.repir.tools.search.ByteSearch;
+import io.github.repir.tools.lib.Log;
 import java.util.HashSet;
-import scrape1.job.Domain_IA;
+import scrape1domain.Domain_IA;
 
 /**
  *

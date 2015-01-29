@@ -1,6 +1,6 @@
 package kba1raw;
 
-import io.github.repir.tools.Lib.UrlStrTools;
+import io.github.repir.tools.lib.UrlStrTools;
 /**
  *
  * @author jeroen
@@ -8,8 +8,12 @@ import io.github.repir.tools.Lib.UrlStrTools;
 public class TitleFilter {
     public static String filter(String url, String title) {
         String host = UrlStrTools.host(UrlStrTools.stripMethod(url));
+        return filterHost(host, title);
+    }
+    
+    public static String filterHost(String host, String title) {
         title = title.trim();
-        if (title.lastIndexOf(" - ") > title.length() / 2 && !host.equals("earthquake.usgs.gov"))
+        while (title.lastIndexOf(" - ") > title.length() / 2 && !host.equals("earthquake.usgs.gov"))
             title = stripfromlast(title, " - ");
         while (title.lastIndexOf(" | ") > title.length() / 2)
             title = stripfromlast(title, " | ");

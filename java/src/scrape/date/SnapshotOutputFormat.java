@@ -1,13 +1,12 @@
 package scrape.date;
 
-import scrape.article.*;
-import io.github.repir.tools.hadoop.IO.OutputFormatFolder;
+import io.github.repir.tools.hadoop.io.OutputFormat;
 import io.github.repir.tools.hadoop.Job;
 /**
  *
  * @author jeroen
  */
-public class SnapshotOutputFormat extends OutputFormatFolder<SnapshotFile, SnapshotWritable> {
+public class SnapshotOutputFormat extends OutputFormat<SnapshotFile, SnapshotWritable> {
 
     public SnapshotOutputFormat() {
         super(SnapshotFile.class, SnapshotWritable.class);

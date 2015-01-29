@@ -1,9 +1,9 @@
 package Cluster;
 
 import KNN.Url;
-import io.github.repir.tools.Buffer.BufferDelayedWriter;
-import io.github.repir.tools.Buffer.BufferReaderWriter;
-import io.github.repir.tools.hadoop.Structured.Writable;
+import io.github.repir.tools.io.buffer.BufferDelayedWriter;
+import io.github.repir.tools.io.buffer.BufferReaderWriter;
+import io.github.repir.tools.hadoop.tsv.Writable;
 import java.util.ArrayList;
 /**
  *
@@ -37,6 +37,16 @@ public class ClusterWritable extends Writable<ClusterFile> {
         this.title = "";
         this.nnid = url.getNN();
         this.nnscore = url.getScore();
+    }
+    
+    public void setRemovedCluster(int id, long creationtime) {
+        this.clusterid = id;
+        this.urlid = -1;
+        this.domain = -1;
+        this.creationtime = creationtime;
+        this.title = "";
+        this.nnid = "";
+        this.nnscore = "";
     }
     
     @Override

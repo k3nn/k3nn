@@ -1,7 +1,7 @@
 package streamcorpus.kba;
 
 import io.github.repir.tools.hadoop.RecordReader;
-import io.github.repir.tools.Lib.Log;
+import io.github.repir.tools.lib.Log;
 import io.github.repir.tools.hadoop.ContextTools;
 import java.io.EOFException;
 import java.io.IOException;

@@ -1,9 +1,9 @@
 package streamcorpus.sentence;
 
-import io.github.repir.tools.Buffer.BufferDelayedWriter;
-import io.github.repir.tools.Buffer.BufferReaderWriter;
-import io.github.repir.tools.Lib.MathTools;
-import io.github.repir.tools.hadoop.Structured.Writable;
+import io.github.repir.tools.io.buffer.BufferDelayedWriter;
+import io.github.repir.tools.io.buffer.BufferReaderWriter;
+import io.github.repir.tools.lib.MathTools;
+import io.github.repir.tools.hadoop.tsv.Writable;
 import java.util.UUID;
 /**
  *
@@ -29,6 +29,10 @@ public class SentenceWritable extends Writable<SentenceFile> {
     
     public UUID getUUID() {
         return new UUID(idhigh, idlow);
+    }
+    
+    public String getDocumentID() {
+        return creationtime + "-" + getUUID().toString().replace("-", "");
     }
     
     @Override

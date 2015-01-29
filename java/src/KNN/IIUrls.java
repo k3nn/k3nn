@@ -1,11 +1,10 @@
 package KNN;
 
-import io.github.repir.tools.Collection.ArrayMap;
-import io.github.repir.tools.Collection.HashMapInt;
-import io.github.repir.tools.Lib.Log;
-import io.github.repir.tools.Lib.Profiler;
-import io.github.repir.tools.Type.Tuple2;
-import io.github.repir.tools.Type.Tuple2Comparable;
+import io.github.repir.tools.collection.ArrayMap;
+import io.github.repir.tools.collection.HashMapInt;
+import io.github.repir.tools.lib.Log;
+import io.github.repir.tools.lib.Profiler;
+import io.github.repir.tools.type.Tuple2Comparable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +14,7 @@ import java.util.Map;
  *
  * @author jeroen
  */
-public class IIUrls extends HashMap<String, HashSet<Url>> {
+public class IIUrls<U extends Url> extends HashMap<String, HashSet<U>> {
 
     public static final Log log = new Log(IIUrls.class);
 
@@ -24,8 +23,8 @@ public class IIUrls extends HashMap<String, HashSet<Url>> {
         candidateUrlClusters
     }
 
-    public void add(String term, Url url) {
-        HashSet<Url> list = get(term);
+    public void add(String term, U url) {
+        HashSet<U> list = get(term);
         if (list == null) {
             list = new HashSet();
             put(term, list);
@@ -33,7 +32,7 @@ public class IIUrls extends HashMap<String, HashSet<Url>> {
         list.add(url);
     }
 
-    public void add(Url url, Collection<String> features) {
+    public void add(U url, Collection<String> features) {
         //log.info("add %d", url.getID());
         for (String term : features) {
             add(term, url);
@@ -41,42 +40,38 @@ public class IIUrls extends HashMap<String, HashSet<Url>> {
     }
 
     public HashSet<Url> candidateUrls(UrlS url) {
-        Profiler.startTime(P.candidateUrlClusters.name());
         HashSet<Url> result = new HashSet();
         for (String term : url.getFeatures()) {
-            HashSet<Url> clusters1 = get(term);
+            HashSet<U> clusters1 = get(term);
             if (clusters1 != null) {
                 result.addAll(clusters1);
             }
         }
-        Profiler.addTime(P.candidateUrlClusters.name());
         return result;
     }
 
-    public ArrayMap<Tuple2Comparable<Integer, Long>, Url> candidateUrlsCount(Collection<String> features) {
-        Profiler.startTime(P.candidateUrlClusters.name());
-        HashMapInt<Url> map = new HashMapInt();
+    public ArrayMap<Tuple2Comparable<Integer, Integer>, U> candidateUrlsCount(Collection<String> features) {
+        HashMapInt<U> map = new HashMapInt();
         for (String term : features) {
-            HashSet<Url> clusters1 = get(term);
+            HashSet<U> clusters1 = get(term);
             if (clusters1 != null) {
-                for (Url u : clusters1)
+                for (U u : clusters1)
                     map.add(u, 1);
             }
         }
-        ArrayMap<Tuple2Comparable<Integer, Long>, Url> result = new ArrayMap();
-        for (Map.Entry<Url, Integer> entry : map.entrySet()) {
+        ArrayMap<Tuple2Comparable<Integer, Integer>, U> result = new ArrayMap();
+        for (Map.Entry<U, Integer> entry : map.entrySet()) {
             Url url = entry.getKey();
-            Tuple2Comparable<Integer, Long> key = new Tuple2Comparable(entry.getValue(), url.getCreationTime());
+            Tuple2Comparable<Integer, Integer> key = new Tuple2Comparable(entry.getValue(), url.getID());
             result.add(key, entry.getKey());
         }
-        Profiler.addTime(P.candidateUrlClusters.name());
         return result;
     }
-
+    
     public void print() {
         log.printf("IIUrls size %d", size());
         int count = 0;
-        for (Map.Entry<String, HashSet<Url>> entry : entrySet()) {
+        for (Map.Entry<String, HashSet<U>> entry : entrySet()) {
             if (count++ < 10) {
                 log.printf("%s -> %d", entry.getKey(), entry.getValue().size());
             } else {

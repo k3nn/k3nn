@@ -1,8 +1,8 @@
 package kba3dedup;
 
 import streamcorpus.sentence.SentenceWritable;
-import io.github.repir.tools.Lib.Log;
-import io.github.repir.tools.hadoop.IO.IntLongWritable;
+import io.github.repir.tools.lib.Log;
+import io.github.repir.tools.hadoop.io.IntLongWritable;
 import java.io.IOException;
 import java.util.HashMap;
 import org.apache.hadoop.io.NullWritable;

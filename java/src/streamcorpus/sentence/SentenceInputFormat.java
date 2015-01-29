@@ -1,8 +1,9 @@
 package streamcorpus.sentence;
 
-import io.github.repir.tools.hadoop.Structured.InputFormat;
+import io.github.repir.tools.hadoop.io.InputFormat;
+import io.github.repir.tools.hadoop.io.StructuredFileInputFormat;
 
-public class SentenceInputFormat extends InputFormat<SentenceFile, SentenceWritable> {
+public class SentenceInputFormat extends StructuredFileInputFormat<SentenceFile, SentenceWritable> {
 
     public SentenceInputFormat() {
         super(SentenceFile.class);

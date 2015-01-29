@@ -1,24 +1,24 @@
 package KNN;
 
-import io.github.repir.tools.Lib.Log;
-import io.github.repir.tools.Lib.UrlStrTools;
+import io.github.repir.tools.lib.Log;
+import io.github.repir.tools.lib.UrlStrTools;
 import java.util.HashMap;
 /**
  *
  * @author jeroen
  */
-public class UrlMap extends HashMap<Integer, UrlM> {
+public class UrlMap<U extends Url> extends HashMap<Integer, U> {
    public static final Log log = new Log( UrlMap.class );
     HashMap<String, Integer> domains = new HashMap();
 
     
-    public UrlM put(int urlid, UrlM url) {
+    public U put(int urlid, U url) {
         return super.put(urlid, url);
     }
     
     public int unclustered() {
         int count = 0;
-        for (UrlM u : values()) {
+        for (U u : values()) {
             if (!u.isClustered()) {
                 count++;
             }

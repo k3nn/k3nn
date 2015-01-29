@@ -1,13 +1,11 @@
 package kba4sort;
 
-import io.github.repir.tools.Content.Datafile;
-import io.github.repir.tools.Content.HDFSPath;
+import io.github.repir.tools.io.Datafile;
+import io.github.repir.tools.io.HDFSPath;
 import streamcorpus.sentence.SentenceWritable;
-import io.github.repir.tools.Lib.Log;
+import io.github.repir.tools.lib.Log;
 import io.github.repir.tools.hadoop.ContextTools;
-import io.github.repir.tools.hadoop.IO.DayPartitioner;
-import io.github.repir.tools.hadoop.IO.IntLongWritable;
-import io.github.repir.tools.hadoop.IO.OutputFormat;
+import io.github.repir.tools.hadoop.io.DayPartitioner;
 import java.io.IOException;
 import kba1raw.ReducerKeysDays;
 import org.apache.hadoop.conf.Configuration;
@@ -26,7 +24,7 @@ public class SortReducer extends Reducer<LongWritable, SentenceWritable, NullWri
     Datafile df;
     SentenceFile sf;
     int sequence = 0;
-    
+
     @Override
     public void setup(Context context) throws IOException {
         Configuration conf = context.getConfiguration();
@@ -37,8 +35,7 @@ public class SortReducer extends Reducer<LongWritable, SentenceWritable, NullWri
         sf = new SentenceFile(df);
         sf.openWrite();
     }
-    
-    
+
     @Override
     public void reduce(LongWritable key, Iterable<SentenceWritable> values, Context context) throws IOException, InterruptedException {
         for (SentenceWritable s : values) {
@@ -47,7 +44,7 @@ public class SortReducer extends Reducer<LongWritable, SentenceWritable, NullWri
             s.write(sf);
         }
     }
-    
+
     @Override
     public void cleanup(Context context) {
         sf.closeWrite();

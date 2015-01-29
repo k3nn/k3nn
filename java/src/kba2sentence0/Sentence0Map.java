@@ -1,11 +1,11 @@
 package kba2sentence0;
 
-import io.github.repir.tools.Content.Datafile;
-import io.github.repir.tools.Content.HDFSPath;
+import io.github.repir.tools.io.Datafile;
+import io.github.repir.tools.io.HDFSPath;
 import streamcorpus.sentence.SentenceWritable;
-import io.github.repir.tools.Lib.Log;
-import io.github.repir.tools.Type.Tuple2;
-import io.github.repir.tools.hadoop.LogMessageFile;
+import io.github.repir.tools.lib.Log;
+import io.github.repir.tools.type.Tuple2;
+import io.github.repir.tools.hadoop.LogFile;
 import java.io.IOException;
 import java.util.HashSet;
 import org.apache.hadoop.conf.Configuration;
@@ -24,7 +24,7 @@ public class Sentence0Map extends Mapper<LongWritable, SentenceWritable, NullWri
     public static final Log log = new Log(Sentence0Map.class);
     SentenceFile sf;
     Datafile df;
-    LogMessageFile logfile;
+    LogFile logfile;
     HashSet<Tuple2<String, Integer>> map = new HashSet();
     long creationtime = 0;
 
@@ -37,7 +37,7 @@ public class Sentence0Map extends Mapper<LongWritable, SentenceWritable, NullWri
         HDFSPath outdir = new HDFSPath(conf, conf.get("output"));
         df = outdir.getFile(date);
         log.info("setup %s %b %d", df.getCanonicalPath(), df.exists(), df.exists() ? df.getLength() : -1);
-        logfile = new LogMessageFile(df);
+        logfile = new LogFile(df);
         logfile.write("%d %s", System.currentTimeMillis() / 1000, df.getCanonicalPath());
         sf = new SentenceFile(df);
         sf.openWrite();

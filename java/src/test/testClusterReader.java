@@ -2,8 +2,8 @@ package test;
 
 import Cluster.ClusterFile;
 import Cluster.ClusterWritable;
-import io.github.repir.tools.Content.Datafile;
-import io.github.repir.tools.Lib.Log;
+import io.github.repir.tools.io.Datafile;
+import io.github.repir.tools.lib.Log;
 import streamcorpus.sentence.SentenceFile;
 import streamcorpus.sentence.SentenceWritable;
 /**

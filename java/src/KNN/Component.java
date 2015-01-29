@@ -1,13 +1,7 @@
 package KNN;
 
-import static KNN.Cluster.log;
-import io.github.repir.tools.Collection.ArrayMap;
-import io.github.repir.tools.Lib.Log;
-import java.util.ArrayList;
-import java.util.HashMap;
+import io.github.repir.tools.lib.Log;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  *

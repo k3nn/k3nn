@@ -1,9 +1,9 @@
 package kba4sort;
 
 import streamcorpus.sentence.SentenceWritable;
-import io.github.repir.tools.Lib.Log;
-import io.github.repir.tools.Lib.MathTools;
-import io.github.repir.tools.hadoop.IO.IntLongWritable;
+import io.github.repir.tools.lib.Log;
+import io.github.repir.tools.lib.MathTools;
+import io.github.repir.tools.hadoop.io.IntLongWritable;
 import java.io.IOException;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;

@@ -1,7 +1,7 @@
 package KNN;
 
-import io.github.repir.tools.Collection.HashMapDouble;
-import io.github.repir.tools.Lib.Log;
+import io.github.repir.tools.collection.HashMapDouble;
+import io.github.repir.tools.lib.Log;
 import java.util.HashSet;
 import java.util.Map;
 /**

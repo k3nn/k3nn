@@ -1,18 +1,18 @@
 package scrape;
 
-import io.github.repir.tools.ByteSearch.ByteSearch;
-import io.github.repir.tools.ByteSearch.ByteSearchSection;
-import io.github.repir.tools.ByteSearch.ByteSection;
-import io.github.repir.tools.Lib.Log;
-import io.github.repir.tools.Lib.WebTools;
-import io.github.repir.tools.Lib.WebTools.UrlResult;
+import io.github.repir.tools.search.ByteSearch;
+import io.github.repir.tools.search.ByteSearchSection;
+import io.github.repir.tools.search.ByteSection;
+import io.github.repir.tools.lib.Log;
+import io.github.repir.tools.lib.WebTools;
+import io.github.repir.tools.lib.WebTools.UrlResult;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import scrape1.job.Domain_IA;
+import scrape1domain.Domain_IA;
 
 /**
  *

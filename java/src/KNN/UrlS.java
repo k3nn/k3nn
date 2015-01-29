@@ -1,9 +1,7 @@
 package KNN;
 
-import io.github.repir.tools.Lib.Log;
-import static io.github.repir.tools.Lib.PrintTools.sprintf;
-import io.github.repir.tools.Lib.UrlStrTools;
-import java.util.ArrayList;
+import io.github.repir.tools.lib.Log;
+import static io.github.repir.tools.lib.PrintTools.sprintf;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -30,9 +28,13 @@ public class UrlS extends UrlT {
         this.featureCount = this.features.size();
     }
 
+    @Override
     public String toString() {
+        if (1==1) {
+            return sprintf("Url %d", getID());
+        }
         StringBuilder sb = new StringBuilder();
-        log.info("toString %d %d %s", getID(), edges, features);
+        //log.info("toString %d %d %s", getID(), edges, features);
         sb.append(sprintf("Url [%d] %s", edges, features));
         //for (int i = 0; i < edges; i++) {
         //    sb.append(nn[i].toString());

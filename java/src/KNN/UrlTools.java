@@ -1,6 +1,6 @@
 package KNN;
 
-import io.github.repir.tools.Lib.Log;
+import io.github.repir.tools.lib.Log;
 /**
  *
  * @author jeroen

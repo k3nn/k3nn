@@ -1,14 +1,12 @@
 package kba1raw;
 
-import io.github.repir.tools.Lib.DateTools;
-import io.github.repir.tools.Lib.Log;
-import io.github.repir.tools.hadoop.IO.ReducerKeys;
+import io.github.repir.tools.lib.DateTools;
+import io.github.repir.tools.lib.Log;
+import io.github.repir.tools.hadoop.io.ReducerKeys;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import streamcorpus.StreamItem;

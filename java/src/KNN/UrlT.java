@@ -1,7 +1,7 @@
 package KNN;
 
-import io.github.repir.tools.Lib.Log;
-import static io.github.repir.tools.Lib.PrintTools.sprintf;
+import io.github.repir.tools.lib.Log;
+import static io.github.repir.tools.lib.PrintTools.sprintf;
 import java.util.Collection;
 
 /**
@@ -26,6 +26,7 @@ public class UrlT extends UrlM {
         this.title = title;
     }
     
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(sprintf("Url [%d] %s", edges, title));

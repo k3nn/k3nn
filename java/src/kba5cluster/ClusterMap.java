@@ -7,14 +7,14 @@ import KNN.Edge;
 import KNN.Stream;
 import KNN.Url;
 import KNN.UrlM;
-import io.github.repir.tools.Collection.ArrayMap;
-import io.github.repir.tools.Collection.ArrayMap3;
-import io.github.repir.tools.Content.Datafile;
-import io.github.repir.tools.Content.HDFSPath;
-import io.github.repir.tools.Extractor.DefaultTokenizer;
-import io.github.repir.tools.Lib.DateTools;
-import io.github.repir.tools.Lib.Log;
-import io.github.repir.tools.Type.Tuple2;
+import io.github.repir.tools.collection.ArrayMap;
+import io.github.repir.tools.collection.ArrayMap3;
+import io.github.repir.tools.io.Datafile;
+import io.github.repir.tools.io.HDFSPath;
+import io.github.repir.tools.extract.DefaultTokenizer;
+import io.github.repir.tools.lib.DateTools;
+import io.github.repir.tools.lib.Log;
+import io.github.repir.tools.type.Tuple2;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class ClusterMap extends Mapper<LongWritable, SentenceWritable, NullWrita
     DefaultTokenizer tokenizer = Stream.getUnstemmedTokenizer();
     ClusterWritable clusterwritable = new ClusterWritable();
     Configuration conf;
-    Stream stream;
+    Stream<UrlM> stream;
     String todayString;
     Date today;
     long time3daysago;
@@ -64,7 +64,6 @@ public class ClusterMap extends Mapper<LongWritable, SentenceWritable, NullWrita
         } catch (ParseException ex) {
             log.fatalexception(ex, "illegal date %s", todayString);
         }
-        Cluster.watch = 344081;
         readClusters();
     }
 
@@ -97,14 +96,14 @@ public class ClusterMap extends Mapper<LongWritable, SentenceWritable, NullWrita
     @Override
     public void cleanup(Context context) throws IOException, InterruptedException {
         HashMap<Integer, Url> out = new HashMap();
-        for (Cluster cluster : Cluster.getClusters()) {
+        for (Cluster<UrlM> cluster : stream.getClusters()) {
             outCluster(out, cluster);
         }
         addUnclustered(out);
         stream.urls = null;
         stream.iiurls = null;
         stream = null;
-        Cluster.clusters = null;
+        stream.dispose();
 
         ArrayMap<Integer, Url> sorted = new ArrayMap();
         for (Url url : out.values()) {
@@ -128,44 +127,54 @@ public class ClusterMap extends Mapper<LongWritable, SentenceWritable, NullWrita
         cf.closeWrite();
     }
 
-    public void outCluster(HashMap<Integer, Url> out, Cluster cluster) throws IOException, InterruptedException {
-        if (cluster.getID() == Cluster.watch) {
+    public void outCluster(HashMap<Integer, Url> out, Cluster<UrlM> cluster) throws IOException, InterruptedException {
+        if (cluster.watch) {
             log.info("write cluster %d %d\n%s", cluster.getID(), cluster.size(), cluster.evalall());
         }
         //log.info("write %d %d", Cluster.watch, cluster.getID());
-        for (Url checkurl : cluster.getUrls()) {
-            if (cluster.getID() == Cluster.watch) {
+        for (UrlM checkurl : cluster.getUrls()) {
+            if (cluster.watch) {
                 log.info("write cluster url creationtime %d %d %b",
                         checkurl.getID(),
                         checkurl.getCreationTime(),
                         checkurl.getCreationTime() > time3daysago);
             }
             if (checkurl.getCreationTime() > time3daysago) {
-                for (Url url : cluster.getUrls()) {
-                    if (!out.containsKey(url.getID())) {
-                        addRec(out, url);
-                    }
-                }
+                addRec(out, new HashSet(cluster.getUrls()));
                 break;
             }
         }
     }
 
     public void addUnclustered(HashMap<Integer, Url> out) {
+        HashSet<Url> urls = new HashSet();
         for (UrlM url : stream.urls.values()) {
             if (!url.isClustered() && url.getCreationTime() > time3daysago && !out.containsKey(url.getID())) {
-                addRec(out, url);
+                urls.add(url);
             }
         }
+        addRec(out, urls);
     }
 
-    public void addRec(HashMap<Integer, Url> map, Url url) {
-        map.put(url.getID(), url);
-        for (int e = 0; e < url.getEdges(); e++) {
-            Url nn = url.getNN(e).getUrl();
-            if (!map.containsKey(nn.getID())) {
-                addRec(map, nn);
+    public void addRec(HashMap<Integer, Url> map, HashSet<Url> toadd) {
+        while (toadd.size() > 0) {
+            for (Url u : toadd) {
+                map.put(u.getID(), u);
+                log.info("add %d", u.getID());
             }
+            HashSet<Url> newadd = new HashSet();
+            for (Url u : toadd) {
+                //if (u.getCreationTime() > this.time3daysago || u.isClustered()) {
+                    for (int e = 0; e < u.getEdges(); e++) {
+                        Url nn = u.getNN(e).getUrl();
+                        if (nn != null && !map.containsKey(nn.getID())) {
+                            newadd.add(nn);
+                            log.info("newadd %d", nn.getID());
+                        }
+                    }
+                //}
+            }
+            toadd = newadd;
         }
     }
 
@@ -188,12 +197,12 @@ public class ClusterMap extends Mapper<LongWritable, SentenceWritable, NullWrita
                     //log.info("readClusters url clusterid %d urlid %d nn %s score %s",
                     //        cw.clusterid, url.getID(), cw.getNN(), cw.getNNScore());
                     if (cw.clusterid >= 0) {
-                        Cluster c = Cluster.clusters.get(cw.clusterid);
+                        Cluster c = stream.getCluster(cw.clusterid);
                         if (c == null) {
-                            c = new Cluster(cw.clusterid);
+                            c = stream.createCluster(cw.clusterid);
                         }
                         url.setCluster(c);
-                            //if (c.getID() == Cluster.watch) {
+                        //if (c.getID() == Cluster.watch) {
                         //}
                     }
                 } else {
@@ -215,7 +224,7 @@ public class ClusterMap extends Mapper<LongWritable, SentenceWritable, NullWrita
             log.info("read %d", stream.urls.size());
         }
 
-        ArrayList<Cluster> clusters = new ArrayList(Cluster.clusters.values());
+        ArrayList<Cluster> clusters = new ArrayList(stream.getClusters());
         for (Cluster c : clusters) {
             c.recheckBase();
         }

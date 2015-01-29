@@ -1,11 +1,11 @@
 package kba1raw;
 
-import io.github.repir.tools.ByteSearch.ByteRegex;
-import io.github.repir.tools.ByteSearch.ByteSearch;
-import io.github.repir.tools.ByteSearch.ByteSearchPosition;
-import io.github.repir.tools.Content.Datafile;
-import io.github.repir.tools.Content.ResourceDataIn;
-import io.github.repir.tools.Lib.Log;
+import io.github.repir.tools.search.ByteRegex;
+import io.github.repir.tools.search.ByteSearch;
+import io.github.repir.tools.search.ByteSearchPosition;
+import io.github.repir.tools.io.Datafile;
+import io.github.repir.tools.io.ResourceDataIn;
+import io.github.repir.tools.lib.Log;
 import java.util.ArrayList;
 
 /**
@@ -22,12 +22,12 @@ public class Domain_KBA {
     public String resourcefile = "newssites_kba.txt";
     ByteRegex filter;
 
-    protected Domain_KBA(String resourcefile) {
+    public Domain_KBA(String resourcefile) {
         this.resourcefile = resourcefile;
         filter = createFilter();
     }
 
-    protected Domain_KBA() {
+    public Domain_KBA() {
         this("newssites_kba.txt");
     }
 
@@ -40,9 +40,12 @@ public class Domain_KBA {
         for (int i = 0; i < regexstring.length; i++) {
             String p = regexstring[i];
             host[i] = p.substring(0, p.indexOf('/'));
+            //p = p.replace("\\", "\\\\");
+            p = p.replace("-", "\\-");
             p = p.replace(".", "\\.");
-            p = p.replace("%W", ".*?");
-            p = p.replace("%N", "[^/]*");
+            p = p.replace("%W", "[^\\?]*?");
+            p = p.replace("%A", ".*?");
+            p = p.replace("%N", "[^/\\?]*");
             p = p.replace("%Y", "201\\d");
             //log.info("%s", p);
             if (p.length() > 0) {
@@ -61,6 +64,11 @@ public class Domain_KBA {
     }
 
     public int getDomainForHost(String h) {
+        for (int i = 0; i < this.host.length; i++) {
+            if (this.host[i].startsWith(h)) {
+                return i;
+            }
+        }
         for (int i = 0; i < this.host.length; i++) {
             if (this.host[i].contains(h)) {
                 return i;
