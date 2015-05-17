@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>StreamCorpus</artifactId>
-    <groupId>StreamCorpus</groupId>
+    <artifactId>NewsClustering</artifactId>
+    <groupId>NewsClustering</groupId>
     <version>0.01a-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>StreamCorpus</name>
@@ -11,16 +11,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
-        <src.dir>${basedir}/java/src</src.dir>
-        <test.dir>${basedir}/java/src/test</test.dir>
+        <src.dir1>${basedir}/java/src</src.dir1>
+        <test.dir1>${basedir}/java/src/test</test.dir1>
     </properties>
   
     <build>
-        <sourceDirectory>${src.dir}</sourceDirectory>
-        <testSourceDirectory>${test.dir}</testSourceDirectory>
+        <sourceDirectory>${src.dir1}</sourceDirectory>
+        <testSourceDirectory>${test.dir1}</testSourceDirectory>
         <resources>
             <resource>
-                <directory>${src.dir}/streamcorpus/resources</directory>
+                <directory>${src.dir1}/resources</directory>
                 <includes>
                     <include>**/*.txt</include>
                 </includes>
@@ -79,7 +79,19 @@
         <dependency>
             <groupId>io.github.repir</groupId>
             <artifactId>RepIRTools</artifactId>
-            <version>0.25a-SNAPSHOT</version>
+            <version>0.26-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>io.github.repir</groupId>
+            <artifactId>RepIR</artifactId>
+            <version>0.26-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.hadoop</groupId>
@@ -102,6 +114,46 @@
             <groupId>org.xerial.snappy</groupId>
             <artifactId>snappy-java</artifactId>
             <version>1.1.1.6</version>
-        </dependency>        
+        </dependency> 
+        <dependency>
+            <groupId>com.rometools</groupId>
+            <artifactId>rome</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom</artifactId>
+            <version>2.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>com.syncthemall</groupId>
+            <artifactId>boilerpipe</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>nekohtml</groupId>
+            <artifactId>nekohtml</artifactId>
+            <version>1.9.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rometools</groupId>
+            <artifactId>rome-modules</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>cc.mallet</groupId>
+            <artifactId>mallet</artifactId>
+            <version>2.0.7-RC2</version>
+        </dependency>
     </dependencies>
 </project>

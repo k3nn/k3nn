@@ -8,10 +8,10 @@ import java.util.Iterator;
  */
 public class EdgeIterator implements Iterator<Edge>, Iterable<Edge> {
    public static final Log log = new Log( EdgeIterator.class );
-   private Url url;
+   private Node url;
    private int pos = 0;
    
-   public EdgeIterator(Url url) {
+   public EdgeIterator(Node url) {
        this.url = url;
    }
 

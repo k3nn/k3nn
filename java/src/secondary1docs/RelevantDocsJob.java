@@ -1,6 +1,6 @@
 package secondary1docs;
 
-import StreamCluster.StreamClusterInputFormat;
+import Cluster.ClusterInputFormat;
 import io.github.repir.tools.io.Datafile;
 import io.github.repir.tools.lib.Log;
 import io.github.repir.tools.hadoop.Conf;
@@ -14,7 +14,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
-import streamcorpus.sentence.SentenceInputFormat;
+import Sentence.SentenceInputFormat;
 
 public class RelevantDocsJob {
 
@@ -33,7 +33,7 @@ public class RelevantDocsJob {
         Job job = new Job(conf, input, out);
                 //job.getConfiguration().setInt("mapreduce.task.timeout", 1800000);
         
-        job.setInputFormatClass(StreamClusterInputFormat.class);
+        job.setInputFormatClass(ClusterInputFormat.class);
         SentenceInputFormat.addDirs(job, input);
 
         job.setNumReduceTasks(0);

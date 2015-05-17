@@ -4,29 +4,39 @@ import io.github.repir.tools.collection.HashMapDouble;
 import io.github.repir.tools.lib.Log;
 import java.util.HashSet;
 import java.util.Map;
+
 /**
- *
+ * similarity function that scores the similarity of nodes based on cosine
+ * similarity between their binary term vectors discounted by the linear
+ * distance over publication time.
  * @author jeroen
  */
 public enum Score {;
    public static final Log log = new Log( Score.class ); 
    public static double days3 = 60 * 60 * 24 * 3;
    
-   public static double compute(Url a, Url b) {
+   public static double compute(Node a, Node b) {
        double t = timeliness(a.getCreationTime(), b.getCreationTime());
-       return (t > 0)?t * cossim(a.getFeatures(), b.getFeatures()):0;
+       return (t > 0)?t * cossim(a.getTerms(), b.getTerms()):0;
    }
    
-   public static double compute2(Url a, Url b, int count) {
+   /**
+    * @param a
+    * @param b 
+    * @param count number of shared terms
+    * @return similarity score
+    */
+   public static double compute2(Node a, Node b, int count) {
        double t = timeliness(a.getCreationTime(), b.getCreationTime());
-       return (t > 0)?t * count / (Math.sqrt(a.getFeatures().size()) * Math.sqrt(b.getFeatures().size())):0;
+       return (t > 0)?t * count / (Math.sqrt(a.getTerms().size()) * Math.sqrt(b.getTerms().size())):0;
    }
    
-   public static double computeMLE(Url a, Component b) {
-       double t = timeliness(a.getCreationTime(), b.getCreationTime());
-       return (t > 0)?t * cossim(a.getFeatures(), b.getFeatures()):0;
-   }
-   
+   /**
+    * @param time1
+    * @param time2
+    * @return linear discount function for the difference between two publication
+    * times.
+    */
    public static double timeliness(long time1, long time2) {
        double diff = time1 > time2?(time1 - time2):(time2 - time1);
        return (diff >= days3)?0.0:1.0 - (diff / days3);

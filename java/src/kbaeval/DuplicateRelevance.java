@@ -1,7 +1,7 @@
 package kbaeval;
 
-import RelCluster.RelClusterFile;
-import RelCluster.RelClusterWritable;
+import MatchingClusterNode.MatchingClusterNodeFile;
+import MatchingClusterNode.MatchingClusterNodeWritable;
 import io.github.repir.tools.collection.ArrayMap;
 import io.github.repir.tools.io.Datafile;
 import io.github.repir.tools.lib.ArgsParser;
@@ -17,7 +17,7 @@ import java.util.Map;
 public class DuplicateRelevance {
    public static final Log log = new Log( DuplicateRelevance.class );
    HashMap<String, ArrayList<MatchesWritable>> matches;
-   ArrayMap<RelClusterWritable, String> results;
+   ArrayMap<MatchingClusterNodeWritable, String> results;
 
    public DuplicateRelevance(String matchesfile, String poolfile, String matchduplicatefile) {
        matches = readMatches(matchesfile);

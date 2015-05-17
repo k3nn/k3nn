@@ -1,11 +1,11 @@
 package test;
 
-import Cluster.ClusterFile;
-import Cluster.ClusterWritable;
+import ClusterNode.ClusterNodeFile;
+import ClusterNode.ClusterNodeWritable;
 import io.github.repir.tools.io.Datafile;
 import io.github.repir.tools.lib.Log;
-import streamcorpus.sentence.SentenceFile;
-import streamcorpus.sentence.SentenceWritable;
+import Sentence.SentenceFile;
+import Sentence.SentenceWritable;
 /**
  *
  * @author jeroen
@@ -18,9 +18,9 @@ public class testClusterReader {
         SentenceFile cf = new SentenceFile(df);
         int lastid = -1;
         for (SentenceWritable cw : cf) {
-            log.info("%d %d", cw.id, df.getOffset());
-            if (cw.id == 142903426) {
-                log.info("%d %s", cw.id, cw.sentence);
+            log.info("%d %d", cw.sentenceID, df.getOffset());
+            if (cw.sentenceID == 142903426) {
+                log.info("%d %s", cw.sentenceID, cw.content);
                 break;
             }
         }

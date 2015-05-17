@@ -1,8 +1,8 @@
 package kbaeval;
 
-import StreamCluster.StreamClusterFile;
-import StreamCluster.StreamClusterWritable;
-import StreamCluster.UrlWritable;
+import Cluster.ClusterFile;
+import Cluster.ClusterWritable;
+import Cluster.NodeWritable;
 import io.github.repir.tools.collection.ArrayMap3;
 import io.github.repir.tools.hadoop.Conf;
 import io.github.repir.tools.io.Datafile;
@@ -39,10 +39,10 @@ public class PercInGT {
        HashSet<String> result = new HashSet();
        Datafile df = new Datafile(HDFSPath.getFS(), resultsfile);
        df.setBufferSize(100000000);
-       StreamClusterFile tf = new StreamClusterFile(df);
-       for (StreamClusterWritable t : tf) {
-           for (UrlWritable u : t.urls) {
-              String updateid = sprintf("%s-%d", u.docid, u.row);
+       ClusterFile tf = new ClusterFile(df);
+       for (ClusterWritable t : tf) {
+           for (NodeWritable u : t.nodes) {
+              String updateid = sprintf("%s-%d", u.docid, u.sentenceNumber);
               result.add(updateid);
            }
        }

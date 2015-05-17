@@ -1,7 +1,7 @@
 package secondary1docs;
 
-import StreamCluster.StreamClusterWritable;
-import StreamCluster.UrlWritable;
+import Cluster.ClusterWritable;
+import Cluster.NodeWritable;
 import io.github.repir.tools.collection.ArrayMap;
 import io.github.repir.tools.hadoop.ContextTools;
 import io.github.repir.tools.io.HDFSPath;
@@ -21,15 +21,15 @@ import org.apache.hadoop.mapreduce.Mapper;
  *
  * @author jeroen
  */
-public class RelevantDocsMap extends Mapper<LongWritable, StreamClusterWritable, NullWritable, NullWritable> {
+public class RelevantDocsMap extends Mapper<LongWritable, ClusterWritable, NullWritable, NullWritable> {
 
     public static final Log log = new Log(RelevantDocsMap.class);
-    HashMap<Integer, ArrayList<StreamClusterWritable>> inmap = new HashMap();
+    HashMap<Integer, ArrayList<ClusterWritable>> inmap = new HashMap();
     HashMap<String, Long> out = new HashMap();
     
     @Override
-    public void map(LongWritable key, StreamClusterWritable value, Context context) throws IOException, InterruptedException {
-        ArrayList<StreamClusterWritable> list = inmap.get(value.clusterid);
+    public void map(LongWritable key, ClusterWritable value, Context context) throws IOException, InterruptedException {
+        ArrayList<ClusterWritable> list = inmap.get(value.clusterid);
         if (list == null) {
             list = new ArrayList();
             inmap.put(value.clusterid, list);
@@ -39,12 +39,12 @@ public class RelevantDocsMap extends Mapper<LongWritable, StreamClusterWritable,
     
     @Override
     public void cleanup(Context context) throws IOException {
-        for (ArrayList<StreamClusterWritable> list : inmap.values()) {
+        for (ArrayList<ClusterWritable> list : inmap.values()) {
             Collections.sort(list, Sorter.instance);
-            for (StreamClusterWritable current : list) {
-               Collections.sort(current.urls, SorterUrl.instance);
-               long emittime = current.lastUrl().creationtime;
-               for (UrlWritable url : current.urls) {
+            for (ClusterWritable current : list) {
+               Collections.sort(current.nodes, SorterUrl.instance);
+               long emittime = current.getCandidateNode().creationtime;
+               for (NodeWritable url : current.nodes) {
                   out(url, emittime);
                }
             }
@@ -68,30 +68,30 @@ public class RelevantDocsMap extends Mapper<LongWritable, StreamClusterWritable,
         return new DocFile(outdir.getFile(filename));
     }
 
-    public void out(UrlWritable url, long emittime) {
+    public void out(NodeWritable url, long emittime) {
         Long currenttime = out.get(url.docid);
         if (currenttime == null || currenttime > emittime)
             out.put(url.docid, emittime);
     }
     
-    static class Sorter implements Comparator<StreamClusterWritable> {
+    static class Sorter implements Comparator<ClusterWritable> {
         static Sorter instance = new Sorter();
 
         @Override
-        public int compare(StreamClusterWritable o1, StreamClusterWritable o2) {
-           int comp = (int)(o1.lastUrl().creationtime - o2.lastUrl().creationtime);
+        public int compare(ClusterWritable o1, ClusterWritable o2) {
+           int comp = (int)(o1.getCandidateNode().creationtime - o2.getCandidateNode().creationtime);
            if (comp == 0) {
-               comp = o1.urls.size() - o2.urls.size();
+               comp = o1.nodes.size() - o2.nodes.size();
            }
            return comp;
         }
     }
     
-    static class SorterUrl implements Comparator<UrlWritable> {
+    static class SorterUrl implements Comparator<NodeWritable> {
         static SorterUrl instance = new SorterUrl();
 
         @Override
-        public int compare(UrlWritable o1, UrlWritable o2) {
+        public int compare(NodeWritable o1, NodeWritable o2) {
            return (int)(o1.creationtime - o2.creationtime);
         }
     }

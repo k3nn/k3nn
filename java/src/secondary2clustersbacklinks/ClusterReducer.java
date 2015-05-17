@@ -1,14 +1,13 @@
 package secondary2clustersbacklinks;
 
-import Cluster.ClusterWritable;
+import ClusterNode.ClusterNodeWritable;
 import KNN.Cluster;
-import KNN2.Stream;
-import KNN.Url;
-import KNN.UrlClusterListener;
-import KNN2.UrlD;
-import StreamCluster.StreamClusterFile;
-import StreamCluster.StreamClusterWritable;
-import StreamCluster.UrlWritable;
+import KNN.Stream;
+import KNN.Node;
+import KNN.NodeD;
+import Cluster.ClusterFile;
+import Cluster.ClusterWritable;
+import Cluster.NodeWritable;
 import io.github.repir.tools.extract.DefaultTokenizer;
 import io.github.repir.tools.io.Datafile;
 import io.github.repir.tools.lib.Log;
@@ -20,30 +19,30 @@ import java.util.HashSet;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Reducer;
-import streamcorpus.sentence.SentenceWritable;
+import Sentence.SentenceWritable;
 
 /**
  *
  * @author jeroen
  */
-public class ClusterReducer extends Reducer<LongLongWritable, SentenceWritable, NullWritable, NullWritable> implements UrlClusterListener {
+public class ClusterReducer extends Reducer<LongLongWritable, SentenceWritable, NullWritable, NullWritable> {
 
     public static final Log log = new Log(ClusterReducer.class);
     Configuration conf;
     DefaultTokenizer tokenizer = Stream.getUnstemmedTokenizer();
-    HashMap<Integer, ArrayList<ClusterWritable>> map = new HashMap();
-    StreamClusterFile cf;
+    HashMap<Integer, ArrayList<ClusterNodeWritable>> map = new HashMap();
+    ClusterFile cf;
     long emittime;
-    Stream<UrlD> stream = new Stream();
+    Stream<NodeD> stream = new Stream();
 
     @Override
     public void setup(Context context) throws IOException {
         conf = context.getConfiguration();
         Datafile df = new Datafile(conf, conf.get("output"));
-        cf = new StreamClusterFile(df);
+        cf = new ClusterFile(df);
         cf.openWrite();
 
-        stream.setListenAll(this);
+        //stream.setListenAll(this);
     }
 
     @Override
@@ -60,43 +59,44 @@ public class ClusterReducer extends Reducer<LongLongWritable, SentenceWritable, 
     }
 
     public void addSentence(SentenceWritable value) {
-        ArrayList<String> features = tokenizer.tokenize(value.sentence);
+        ArrayList<String> features = tokenizer.tokenize(value.content);
         if (features.size() > 1) {
             HashSet<String> uniq = new HashSet(features);
-            UrlD url = new UrlD(value.id, value.domain, value.sentence, uniq, value.creationtime, value.getUUID(), value.row);
-            stream.urls.put(url.getID(), url);
+            NodeD url = new NodeD(value.sentenceID, value.domain, value.content, uniq, value.creationtime, value.getUUID(), value.sentenceNumber);
+            stream.nodes.put(url.getID(), url);
             stream.add(url, uniq);
+            if (url.isClustered())
+                urlChanged(url);
         }
     }
 
-    @Override
-    public void urlChanged(Url addedurl, HashSet<Url> urls) {
+    public void urlChanged(Node addedurl) {
         if (addedurl.getCreationTime() == emittime) {
-            Cluster<UrlD> cluster = addedurl.getCluster();
+            Cluster<NodeD> cluster = addedurl.getCluster();
             if (cluster != null) {
-                StreamClusterWritable cw = new StreamClusterWritable();
+                ClusterWritable cw = new ClusterWritable();
                 cw.clusterid = cluster.getID();
-                for (Url url : cluster.getUrls()) {
+                for (Node url : cluster.getNodes()) {
                     if (url != addedurl) {
-                        cw.urls.add(toUrlWritable((UrlD) url));
+                        cw.nodes.add(toUrlWritable((NodeD) url));
                     }
                 }
-                cw.urls.add(toUrlWritable((UrlD) addedurl));
+                cw.nodes.add(toUrlWritable((NodeD) addedurl));
                 cw.write(cf);
             }
         }
     }
 
-    public UrlWritable toUrlWritable(UrlD url) {
-        UrlWritable u = new UrlWritable();
+    public NodeWritable toUrlWritable(NodeD url) {
+        NodeWritable u = new NodeWritable();
         u.creationtime = url.getCreationTime();
         u.docid = url.getDocumentID();
         u.domain = url.getDomain();
         u.nnid = url.getNN();
         u.nnscore = url.getScore();
-        u.row = url.sentence;
-        u.title = url.getTitle();
-        u.urlid = url.getID();
+        u.sentenceNumber = url.sentence;
+        u.content = url.getContent();
+        u.sentenceID = url.getID();
         return u;
     }
 }

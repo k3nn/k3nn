@@ -1,7 +1,7 @@
 package kbaeval;
 
-import RelCluster.RelClusterFile;
-import RelCluster.RelClusterWritable;
+import MatchingClusterNode.MatchingClusterNodeFile;
+import MatchingClusterNode.MatchingClusterNodeWritable;
 import io.github.repir.tools.collection.ArrayMap;
 import io.github.repir.tools.io.Datafile;
 import io.github.repir.tools.lib.ArgsParser;
@@ -18,7 +18,7 @@ import java.util.Map;
 public class Relevance2 {
    public static final Log log = new Log( Relevance2.class );
    HashMap<String, ArrayList<MatchesWritable>> matches;
-   ArrayMap<RelClusterWritable, String> results;
+   ArrayMap<MatchingClusterNodeWritable, String> results;
    HashSet<String> matchednuggets = new HashSet();
 
    protected Relevance2() {}
@@ -45,11 +45,11 @@ public class Relevance2 {
        return nuggets.size();
    }
    
-   public ArrayMap<RelClusterWritable, String> readResults(String resultsfile) {
-       ArrayMap<RelClusterWritable, String> result = new ArrayMap();
+   public ArrayMap<MatchingClusterNodeWritable, String> readResults(String resultsfile) {
+       ArrayMap<MatchingClusterNodeWritable, String> result = new ArrayMap();
        Datafile df = new Datafile(resultsfile);
-       RelClusterFile tf = new RelClusterFile(df);
-       for (RelClusterWritable t : tf) {
+       MatchingClusterNodeFile tf = new MatchingClusterNodeFile(df);
+       for (MatchingClusterNodeWritable t : tf) {
            result.add(t, "");
        }
        return result;
@@ -65,10 +65,10 @@ public class Relevance2 {
        return result;
    }
    
-   public void setRelevanceResults(ArrayMap<RelClusterWritable, String> results) {
-       for (Map.Entry<RelClusterWritable, String> entry : results) {
-           RelClusterWritable update = entry.getKey();
-           String updateid = sprintf("%s-%d", update.documentid, update.row);
+   public void setRelevanceResults(ArrayMap<MatchingClusterNodeWritable, String> results) {
+       for (Map.Entry<MatchingClusterNodeWritable, String> entry : results) {
+           MatchingClusterNodeWritable update = entry.getKey();
+           String updateid = sprintf("%s-%d", update.documentID, update.sentenceNumber);
            ArrayList<MatchesWritable> nuggets = matches.get(updateid);
            if (nuggets != null)
               entry.setValue(listNuggets(nuggets));
@@ -85,16 +85,16 @@ public class Relevance2 {
        }
    }
    
-   public void listRelevantResults(ArrayMap<RelClusterWritable, String> results) {
-       for (Map.Entry<RelClusterWritable, String> entry : results) {
-           RelClusterWritable update = entry.getKey();
+   public void listRelevantResults(ArrayMap<MatchingClusterNodeWritable, String> results) {
+       for (Map.Entry<MatchingClusterNodeWritable, String> entry : results) {
+           MatchingClusterNodeWritable update = entry.getKey();
            String nuggets = entry.getValue();
            if (nuggets.length() > 0) {
                log.printf("\n%s", nuggets);
                for (String nugget : nuggets.split(","))
                    matchednuggets.add(nugget);
            }
-           log.printf("%2d %s-%d %s", update.clusterid, update.documentid, update.row, update.title);
+           log.printf("%2d %s-%d %s", update.clusterID, update.documentID, update.sentenceNumber, update.content);
            
        }
        log.info("%d %d %f", matchednuggets.size(), results.size(), matchednuggets.size()/(double)results.size());

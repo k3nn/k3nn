@@ -1,8 +1,8 @@
 package kbaeval;
 
-import StreamCluster.StreamClusterFile;
-import StreamCluster.StreamClusterWritable;
-import StreamCluster.UrlWritable;
+import Cluster.ClusterFile;
+import Cluster.ClusterWritable;
+import Cluster.NodeWritable;
 import io.github.repir.tools.collection.ArrayMap;
 import io.github.repir.tools.collection.ArrayMap3;
 import io.github.repir.tools.hadoop.Conf;
@@ -22,7 +22,7 @@ import java.util.Map;
 public class ListCluster {
    public static final Log log = new Log( ListCluster.class );
    HashMap<String, ArrayList<MatchesWritable>> matches;
-   ArrayMap3<UrlWritable, Integer, String> results;
+   ArrayMap3<NodeWritable, Integer, String> results;
 
    public ListCluster(String matchesfile, String resultsfile) {
        matches = readMatches(matchesfile);
@@ -36,12 +36,12 @@ public class ListCluster {
        return mf.getMap();
    }
    
-   public ArrayMap3<UrlWritable, Integer, String> readResults(String resultsfile) {
-       ArrayMap3<UrlWritable, Integer, String> result = new ArrayMap3();
+   public ArrayMap3<NodeWritable, Integer, String> readResults(String resultsfile) {
+       ArrayMap3<NodeWritable, Integer, String> result = new ArrayMap3();
        Datafile df = new Datafile(HDFSPath.getFS(), resultsfile);
-       StreamClusterFile tf = new StreamClusterFile(df);
-       for (StreamClusterWritable t : tf) {
-           for (UrlWritable u : t.urls) {
+       ClusterFile tf = new ClusterFile(df);
+       for (ClusterWritable t : tf) {
+           for (NodeWritable u : t.nodes) {
               result.add(u, t.clusterid, "");
            }
        }
@@ -49,22 +49,22 @@ public class ListCluster {
    }
    
    public void setRelevanceResults() {
-       for (Map.Entry<UrlWritable, Tuple2<Integer, String>> entry : results) {
-           UrlWritable update = entry.getKey();
-           String updateid = sprintf("%s-%d", update.docid, update.row);
+       for (Map.Entry<NodeWritable, Tuple2<Integer, String>> entry : results) {
+           NodeWritable update = entry.getKey();
+           String updateid = sprintf("%s-%d", update.docid, update.sentenceNumber);
            ArrayList<MatchesWritable> nuggets = matches.get(updateid);
            if (nuggets != null)
-              entry.setValue(new Tuple2<Integer, String>(entry.getValue().value1, listNuggets(nuggets)));
+              entry.setValue(new Tuple2<Integer, String>(entry.getValue().key, listNuggets(nuggets)));
        }
    }
    
    public void listRelevantResults() {
-       for (Map.Entry<UrlWritable, Tuple2<Integer, String>> entry : results) {
-           UrlWritable update = entry.getKey();
-           String nuggets = entry.getValue().value2;
-           int cluster = entry.getValue().value1;
+       for (Map.Entry<NodeWritable, Tuple2<Integer, String>> entry : results) {
+           NodeWritable update = entry.getKey();
+           String nuggets = entry.getValue().value;
+           int cluster = entry.getValue().key;
            if (nuggets.length() > 0) {
-               log.printf("%6d %s-%d %s", cluster, update.docid, update.row, nuggets);
+               log.printf("%6d %s-%d %s", cluster, update.docid, update.sentenceNumber, nuggets);
            }
        }
    }

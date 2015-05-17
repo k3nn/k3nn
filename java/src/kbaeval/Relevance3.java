@@ -1,6 +1,6 @@
 package kbaeval;
 
-import RelCluster.RelClusterWritable;
+import MatchingClusterNode.MatchingClusterNodeWritable;
 import io.github.repir.tools.collection.ArrayMap;
 import io.github.repir.tools.lib.ArgsParser;
 import io.github.repir.tools.lib.Log;
@@ -17,9 +17,9 @@ public class Relevance3 extends Relevance2 {
     }
    
    @Override
-   public void listRelevantResults(ArrayMap<RelClusterWritable, String> results) {
-       for (Map.Entry<RelClusterWritable, String> entry : results) {
-           RelClusterWritable update = entry.getKey();
+   public void listRelevantResults(ArrayMap<MatchingClusterNodeWritable, String> results) {
+       for (Map.Entry<MatchingClusterNodeWritable, String> entry : results) {
+           MatchingClusterNodeWritable update = entry.getKey();
            String nuggets = entry.getValue();
            if (nuggets.length() > 0) {
                for (String nugget : nuggets.split(","))

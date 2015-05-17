@@ -1,4 +1,0 @@
-www.ynetnews.com/articles/%W.html
-www.timesofisrael.com/[^\\-/]+-[^\\-/]+-[^\\-/]+-%N/
-www.jpost.com/%N/%A(-|=)\d\d\d\d\d
-www.israelnationalnews.com/News/News.aspx/

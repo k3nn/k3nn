@@ -3,7 +3,7 @@ package test;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TIOStreamTransport;
 import org.apache.thrift.transport.TTransport;
-import streamcorpus.StreamItem;
+import kba1SourceToSentences.kba.StreamItem;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;

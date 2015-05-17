@@ -17,8 +17,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import secondary1docs.DocFile;
 import secondary1docs.DocWritable;
-import streamcorpus.sentence.SentenceInputFormat;
-import streamcorpus.sentence.SentenceWritable;
+import Sentence.SentenceInputFormat;
+import Sentence.SentenceWritable;
 
 public class ClusterJob {
 
@@ -28,7 +28,7 @@ public class ClusterJob {
     public static Job setup(String args[]) throws IOException {
         conf = new Conf(args, "-i input -o output -d source");
         conf.setReduceSpeculativeExecution(false);
-        conf.setreduceMemoryMB(4096);
+        conf.setReduceMemoryMB(4096);
         getRelevantDocs(conf);
 
         String input = conf.get("input");
@@ -75,7 +75,7 @@ public class ClusterJob {
             String part[] = docid.split("-");
             if (part.length == 2) {
                 long creationtime = Long.parseLong(part[0]);
-                Date creationdate = DateTools.secToDate(creationtime);
+                Date creationdate = DateTools.epochToDate(creationtime);
                 dates.add(DateTools.FORMAT.Y_M_D.format(creationdate));
             }
         }

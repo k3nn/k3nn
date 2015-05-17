@@ -1,6 +1,6 @@
 package kbaeval;
 
-import RelCluster.RelClusterWritable;
+import MatchingClusterNode.MatchingClusterNodeWritable;
 import io.github.repir.tools.collection.ArrayMap;
 import io.github.repir.tools.lib.ArgsParser;
 import io.github.repir.tools.lib.Log;

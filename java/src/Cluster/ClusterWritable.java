@@ -1,119 +1,59 @@
 package Cluster;
 
-import KNN.Url;
-import io.github.repir.tools.io.buffer.BufferDelayedWriter;
-import io.github.repir.tools.io.buffer.BufferReaderWriter;
-import io.github.repir.tools.hadoop.tsv.Writable;
+import com.google.gson.reflect.TypeToken;
+import io.github.repir.tools.hadoop.json.Writable;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+
 /**
- *
+ * A cluster of nodes, uses gson for communication between map/reduce.
  * @author jeroen
  */
 public class ClusterWritable extends Writable<ClusterFile> {
+    // needed for gson
+    public static Type type = new TypeToken<ClusterWritable>(){}.getType();
+    // internal cluster ID
     public int clusterid;
-    public int urlid;
-    public long creationtime;
-    public String title;
-    public int domain;
-    public String nnid;
-    public String nnscore;
+    // list of nodes contained, the last url is a possible candidate url 
+    // i.e. it was added last to the cluster and may therefore be emitted
+    // if it immediately qualifies.
+    public ArrayList<NodeWritable> nodes = new ArrayList();
 
     public ClusterWritable() {
-    }
-    
-    public int hashCode() {
-        return urlid;
-    }
-
-    public boolean equals(Object o) {
-        return ((ClusterWritable)o).urlid == urlid;
-    }
-    
-    public void set(Url url) {
-        this.clusterid = url.isClustered()?url.getCluster().getID():-1;
-        this.urlid = url.getID();
-        this.domain = url.getDomain();
-        this.creationtime = url.getCreationTime();
-        this.title = "";
-        this.nnid = url.getNN();
-        this.nnscore = url.getScore();
-    }
-    
-    public void setRemovedCluster(int id, long creationtime) {
-        this.clusterid = id;
-        this.urlid = -1;
-        this.domain = -1;
-        this.creationtime = creationtime;
-        this.title = "";
-        this.nnid = "";
-        this.nnscore = "";
     }
     
     @Override
     public void read(ClusterFile f) {
         this.clusterid = f.clusterid.get();
-        this.urlid = f.urlid.get();
-        this.domain = f.domain.get();
-        this.creationtime = f.creationtime.get();
-        this.title = f.title.get();
-        this.nnid = f.nnid.get();
-        this.nnscore = f.nnscore.get();
-    }
-
-    @Override
-    public void write(BufferDelayedWriter writer)  {
-        writer.write(clusterid);
-        writer.write(urlid);
-        writer.write(domain);
-        writer.write(creationtime);
-        writer.write(title);
-        writer.write(nnid);
-        writer.write(nnscore);
-    }
-
-    @Override
-    public void readFields(BufferReaderWriter reader) {
-        clusterid = reader.readInt();
-        urlid = reader.readInt();
-        domain = reader.readInt();
-        creationtime = reader.readLong();
-        title = reader.readString();
-        nnid = reader.readString();
-        nnscore = reader.readString();
+        this.nodes = f.urls.get();
     }
 
     @Override
     public void write(ClusterFile file) {
         file.clusterid.set(clusterid);
-        file.urlid.set(urlid);
-        file.domain.set(domain);
-        file.creationtime.set(creationtime);
-        file.title.set(title);
-        file.nnid.set(nnid);
-        file.nnscore.set(nnscore);
+        file.urls.set(nodes);
         file.write();
     }
     
-    public ArrayList<Integer> getNN() {
-        String parts[] = nnid.split(",");
-        ArrayList<Integer> list = new ArrayList();
-        for (String p : parts) {
-            if (p.length() > 0) {
-                list.add(Integer.parseInt(p));
-            }
-        }
-        return list;
+    /**
+     * @return the candidate Node, i.e. the last node that was added to the cluster
+     */
+    public NodeWritable getCandidateNode() {
+        return nodes.get((nodes.size()-1));
+    }
+    
+    @Override
+    protected Type getType() {
+        return type;
     }
 
-    public ArrayList<Double> getNNScore() {
-        String parts[] = nnscore.split(",");
-        ArrayList<Double> list = new ArrayList();
-        for (String p : parts) {
-            if (p.length() > 0) {
-                list.add(Double.parseDouble(p));
-            }
+    @Override
+    protected void getAttributes(Object o) {
+        if (o instanceof ClusterWritable) {
+            ClusterWritable u = (ClusterWritable) o;
+            this.clusterid = u.clusterid;
+            this.nodes = u.nodes;
         }
-        return list;
     }
     
 }

@@ -1,12 +1,12 @@
 package kbaeval;
 
-import Cluster.ClusterFile;
-import Cluster.ClusterWritable;
+import ClusterNode.ClusterNodeFile;
+import ClusterNode.ClusterNodeWritable;
 import KNN.Cluster;
 import KNN.Edge;
-import KNN.Url;
+import KNN.Node;
 import KNN.Stream;
-import KNN.UrlS;
+import KNN.NodeS;
 import io.github.repir.tools.collection.ArrayMap;
 import io.github.repir.tools.extract.DefaultTokenizer;
 import io.github.repir.tools.hadoop.Conf;
@@ -23,30 +23,30 @@ import java.util.HashSet;
 public class TryClusterOldHD {
 
     public static final Log log = new Log(TryClusterOldHD.class);
-    Stream<UrlS> stream = new Stream();
+    Stream<NodeS> stream = new Stream();
     DefaultTokenizer tokenizer = Stream.getUnstemmedTokenizer();
     Cluster cluster;
     Conf conf;
 
     public TryClusterOldHD(Conf conf, String yesterday, String today, int clusterid) {
         this.conf = conf;
-        Cluster<UrlS> end = readResults(today, clusterid);
+        Cluster<NodeS> end = readResults(today, clusterid);
         stream = new Stream();
         stream.setNextClusterID(clusterid);
-        Cluster<UrlS> start = null;
+        Cluster<NodeS> start = null;
         if (yesterday != null && yesterday.length() > 0)
             start = readResults(yesterday, clusterid);
-        ArrayMap<Long, UrlS> newurls = new ArrayMap();
-        for (UrlS url : end.getUrls()) {
+        ArrayMap<Long, NodeS> newurls = new ArrayMap();
+        for (NodeS url : end.getNodes()) {
             newurls.add(url.getCreationTime(), url);
         }
         if (start != null) {
             log.info("%s", start.evalall());
         }
         LOOP:
-        for (Url url : newurls.ascending().values()) {
+        for (Node url : newurls.ascending().values()) {
             if (start != null) {
-                for (UrlS u : start.getUrls()) {
+                for (NodeS u : start.getNodes()) {
                     if (u.getID() == url.getID()) {
                         continue LOOP;
                     }
@@ -54,9 +54,9 @@ public class TryClusterOldHD {
             } else {
                 stream.setNextClusterID(clusterid);
             }
-            UrlS u = new UrlS(url.getID(), url.getDomain(), url.getTitle(), url.getFeatures(), url.getCreationTime());
-            stream.urls.put(u.getID(), u);
-            stream.add(u, u.getFeatures());
+            NodeS u = new NodeS(url.getID(), url.getDomain(), url.getContent(), url.getTerms(), url.getCreationTime());
+            stream.nodes.put(u.getID(), u);
+            stream.add(u, u.getTerms());
             log.info("add %d", u.getID());
             if (stream.getCluster(clusterid) != null)
                log.info("%s", stream.getCluster(clusterid).evalall());
@@ -65,43 +65,43 @@ public class TryClusterOldHD {
     
     public Cluster readResults(String resultsfile, int clusterid) {
         Datafile df = new Datafile(conf, resultsfile);
-        ClusterFile tf = new ClusterFile(df);
-        ArrayList<ClusterWritable> list = new ArrayList();
-        for (ClusterWritable t : tf) {
+        ClusterNodeFile tf = new ClusterNodeFile(df);
+        ArrayList<ClusterNodeWritable> list = new ArrayList();
+        for (ClusterNodeWritable t : tf) {
             //log.info("row %d", t.clusterid);
-            if (t.clusterid == clusterid) {
+            if (t.clusterID == clusterid) {
                 list.add(t);
             }
         }
         return select(list);
     }
 
-    public Cluster select(ArrayList<ClusterWritable> list) {
-        for (ClusterWritable r : list) {
-            HashSet<String> features = new HashSet(tokenizer.tokenize(r.title));
-            UrlS u = new UrlS(r.urlid, r.domain, r.title, features, r.creationtime);
-            stream.urls.put(u.getID(), u);
-            stream.iiurls.add(u, features);
+    public Cluster select(ArrayList<ClusterNodeWritable> list) {
+        for (ClusterNodeWritable r : list) {
+            HashSet<String> features = new HashSet(tokenizer.tokenize(r.content));
+            NodeS u = new NodeS(r.sentenceID, r.domain, r.content, features, r.creationTime);
+            stream.nodes.put(u.getID(), u);
+            stream.iinodes.add(u, features);
         }
         if (list.size() == 0) {
             return null;
         }
-        Cluster c = stream.createCluster(list.get(0).clusterid);
+        Cluster c = stream.createCluster(list.get(0).clusterID);
 //        for (Map.Entry<Integer, UrlM> u : stream.urls.entrySet())
 //            log.info("%d %s", u.getKey(), u.getValue());
-        for (ClusterWritable r : list) {
-            Url url = stream.urls.get(r.urlid);
+        for (ClusterNodeWritable r : list) {
+            Node url = stream.nodes.get(r.sentenceID);
             //log.info("%d %s", r.urlid, url);
             ArrayList<Integer> nn = getNN(r.nnid);
             ArrayList<Double> score = getScores(r.nnscore);
             for (int i = 0; i < nn.size(); i++) {
-                Url u = stream.urls.get(nn.get(i));
+                Node u = stream.nodes.get(nn.get(i));
                 Edge e = new Edge(u, score.get(i));
                 url.add(e);
             }
             url.setCluster(c);
         }
-        c.setBase(Cluster.getBase(c.getUrls()));
+        c.setBase(Cluster.getBase(c.getNodes()));
         return c;
     }
 

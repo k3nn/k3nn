@@ -1,7 +1,9 @@
 package Cluster;
 
+import com.google.gson.reflect.TypeToken;
 import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.hadoop.tsv.File;
+import io.github.repir.tools.hadoop.json.File;
+import java.util.ArrayList;
 
 /**
  *
@@ -10,13 +12,9 @@ import io.github.repir.tools.hadoop.tsv.File;
 public class ClusterFile extends File<ClusterWritable> {
 
     public IntField clusterid = addInt("clusterid");
-    public IntField urlid = addInt("urlid");
-    public IntField domain = addInt("domain");
-    public LongField creationtime = addLong("creationtime");
-    public StringField title = addString("title");
-    public StringField nnid = addString("nnid");
-    public StringField nnscore = addString("nnscore");
-
+    public JsonArrayField<NodeWritable> urls = 
+            this.addJsonArray("urls", new TypeToken<ArrayList<NodeWritable>>(){}.getType());
+    
     public ClusterFile(Datafile df) {
         super(df);
     }
