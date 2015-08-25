@@ -1,12 +1,12 @@
 package stream4ClusterSentencesPurge;
 
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.Conf;
-import io.github.repir.tools.hadoop.Job;
-import io.github.repir.tools.hadoop.io.InputFormat;
-import io.github.repir.tools.io.HDFSPath;
-import io.github.repir.tools.lib.DateTools;
+import io.github.htools.io.Datafile;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.Conf;
+import io.github.htools.hadoop.Job;
+import io.github.htools.hadoop.io.InputFormat;
+import io.github.htools.io.HDFSPath;
+import io.github.htools.lib.DateTools;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
@@ -17,8 +17,8 @@ import stream3DocStream.DocFile;
 import stream3DocStream.DocWritable;
 import Sentence.SentenceInputFormat;
 import Sentence.SentenceWritable;
-import io.github.repir.tools.collection.HashMap3;
-import io.github.repir.tools.hadoop.io.LongBoolWritable;
+import io.github.htools.collection.HashMap3;
+import io.github.htools.hadoop.io.LongBoolWritable;
 import org.apache.hadoop.io.LongWritable;
 
 public class ClusterSentencesJob {

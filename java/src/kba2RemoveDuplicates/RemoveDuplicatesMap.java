@@ -1,9 +1,9 @@
 package kba2RemoveDuplicates;
 
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.io.HDFSPath;
+import io.github.htools.io.Datafile;
+import io.github.htools.io.HDFSPath;
 import Sentence.SentenceWritable;
-import io.github.repir.tools.lib.Log;
+import io.github.htools.lib.Log;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +16,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import Sentence.SentenceFile;
-import io.github.repir.tools.hadoop.io.LongLongWritable;
+import io.github.htools.hadoop.io.LongLongWritable;
 
 /**
  * Removes duplicates that have the exact same documentID in the collection,

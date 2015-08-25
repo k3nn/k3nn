@@ -1,18 +1,18 @@
 package KNN;
 
-import io.github.repir.tools.collection.ArrayMap;
-import io.github.repir.tools.collection.HashMapInt;
-import io.github.repir.tools.extract.DefaultTokenizer;
-import io.github.repir.tools.extract.modules.RemoveFilteredWords;
-import io.github.repir.tools.extract.modules.StemTokens;
-import io.github.repir.tools.extract.modules.TokenToLowercase;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.lib.Profiler;
-import io.github.repir.tools.type.Tuple2Comparable;
-import io.github.repir.tools.Words.StopWordsMultiLang;
-import io.github.repir.tools.extract.DefaultTokenizerCased;
-import io.github.repir.tools.extract.modules.ConvertToLowercase;
-import io.github.repir.tools.extract.modules.LowercaseTokens;
+import io.github.htools.collection.ArrayMap;
+import io.github.htools.collection.HashMapInt;
+import io.github.htools.extract.DefaultTokenizer;
+import io.github.htools.extract.modules.RemoveFilteredWords;
+import io.github.htools.extract.modules.StemTokens;
+import io.github.htools.extract.modules.TokenToLowercase;
+import io.github.htools.lib.Log;
+import io.github.htools.lib.Profiler;
+import io.github.htools.type.Tuple2Comparable;
+import io.github.htools.words.StopWordsMultiLang;
+import io.github.htools.extract.DefaultTokenizerCased;
+import io.github.htools.extract.modules.ConvertToLowercase;
+import io.github.htools.extract.modules.LowercaseTokens;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -370,43 +370,6 @@ public class Stream<N extends Node> {
         return new Edge(destination, score);
     }
 
-//    public void getBest3(N newnode,
-//            N existingnode,
-//            double score,
-//            HashSet<Node> changes,
-//            HashSet<Cluster<N>> recheckcluster) {
-//        //log.info("getBest1 url %s cluster %s", url.url, u);
-//        if (score > newnode.getLowestScore()) {
-//            newnode.add(createEdge(newnode, existingnode, score));
-//        }
-//        if (newnode.watch) {
-//            log.info("getBest3 url %d %s %s", newnode.getID(), newnode.getNN(), newnode.getScore());
-//        }
-//        if (score > existingnode.getLowestScore()) {
-//            Edge e = createEdge(existingnode, newnode, score);
-//            if (!existingnode.isClustered() || (existingnode.getEdges() == Cluster.K && existingnode.getNN(Cluster.K - 1).node.getCluster() == existingnode.getCluster())) {
-//                if (existingnode.isClustered() && existingnode.getCluster().getBase().contains(existingnode)) {
-//                    Cluster c = existingnode.getCluster();
-//                    if (existingnode.getLowestNN().getCluster() == c) {
-//                        if (c.watch) {
-//                            log.info("steal cluster %d url %d nn %d score %f newnn %d newscore %f",
-//                                    c.getID(), existingnode.getID(), existingnode.getLowestNN().getID(), existingnode.getLowestScore(), newnode.getID(), score);
-//                        }
-//                        recheckcluster.add(c);
-//                    }
-//                }
-//                changes.add(existingnode);
-//            }
-//            if (existingnode.watch && existingnode.getEdges() == Cluster.K) {
-//                Node nn = existingnode.getLowestNN();
-//                //log.info("steal url %d nn %d score %f", existing.getID(), nn.getID(), existing.getLowestScore());
-//            }
-//            existingnode.add(e);
-//            if (existingnode.watch && existingnode.getEdges() == Cluster.K) {
-//                log.info("steal url %d %s %s", existingnode.getID(), existingnode.getNN(), existingnode.getScore());
-//            }
-//        }
-//    }
     public void purge(long datetime) {
         this.iinodes.purge(datetime);
     }

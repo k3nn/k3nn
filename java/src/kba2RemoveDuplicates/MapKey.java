@@ -1,6 +1,6 @@
 package kba2RemoveDuplicates;
 
-import io.github.repir.tools.lib.Log;
+import io.github.htools.lib.Log;
 /**
  *
  * @author jeroen

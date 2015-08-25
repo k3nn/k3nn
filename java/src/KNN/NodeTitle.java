@@ -1,19 +1,19 @@
 package KNN;
 
-import io.github.repir.tools.lib.Log;
-import static io.github.repir.tools.lib.PrintTools.sprintf;
+import io.github.htools.lib.Log;
+import static io.github.htools.lib.PrintTools.sprintf;
 import java.util.Collection;
 
 /**
  * Extension of Node that also holds a String of its contents.
  * @author jeroen
  */
-public class NodeT extends NodeM {
+public class NodeTitle extends NodeM {
 
-    static Log log = new Log(NodeT.class);
+    static Log log = new Log(NodeTitle.class);
     String content; // content the node represents
 
-    public NodeT(long id, int domain, String title, Collection<String> features, long creationtime) {
+    public NodeTitle(long id, int domain, String title, Collection<String> features, long creationtime) {
         super(id, domain, creationtime, features);
         this.content = title;
     }

@@ -2,11 +2,11 @@ package stream3DocStream;
 
 import secondary1docs.*;
 import Cluster.ClusterInputFormat;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.Conf;
-import io.github.repir.tools.hadoop.Job;
-import io.github.repir.tools.io.HDFSPath;
+import io.github.htools.io.Datafile;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.Conf;
+import io.github.htools.hadoop.Job;
+import io.github.htools.io.HDFSPath;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.apache.hadoop.conf.Configuration;

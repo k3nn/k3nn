@@ -2,12 +2,12 @@ package kba7TopicMatchingSentences;
 
 import ClusterNode.ClusterNodeFile;
 import ClusterNode.ClusterNodeWritable;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.io.HDFSPath;
-import io.github.repir.tools.lib.Log;
-import static io.github.repir.tools.lib.PrintTools.sprintf;
-import io.github.repir.tools.hadoop.ContextTools;
-import io.github.repir.tools.hadoop.io.IntLongWritable;
+import io.github.htools.io.Datafile;
+import io.github.htools.io.HDFSPath;
+import io.github.htools.lib.Log;
+import static io.github.htools.lib.PrintTools.sprintf;
+import io.github.htools.hadoop.ContextTools;
+import io.github.htools.hadoop.io.IntLongWritable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

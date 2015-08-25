@@ -10,10 +10,10 @@ import Cluster.NodeWritable;
 import KNN.Cluster;
 import KNN.Edge;
 import KNN.Stream;
-import io.github.repir.tools.extract.modules.RemoveStopwordsInquery;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.extract.modules.RemoveStopwordsSmart;
-import io.github.repir.tools.lib.Log;
+import io.github.htools.extract.modules.RemoveStopwordsInquery;
+import io.github.htools.io.Datafile;
+import io.github.htools.extract.modules.RemoveStopwordsSmart;
+import io.github.htools.lib.Log;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,12 +32,12 @@ public class RetrieveTop3File extends RetrieveTop3<NodeD> {
     public RetrieveTop3File(Datafile out) {
         outfile = new TrecFile(out);
         outfile.openWrite();
-        outclusterfile = new MatchingClusterNodeFile(out.getDir().getFile(out.getFilename() + ".titles"));
+        outclusterfile = new MatchingClusterNodeFile(out.getDir().getFile(out.getName() + ".titles"));
         outclusterfile.openWrite();
     }
 
     public void process(TopicWritable topic, Datafile in) throws IOException, InterruptedException {
-        init(topic.id, topic.start, topic.end, topic.query);
+        init(topic.id, topic.start, topic.end, Query.create(tokenizer, topic.query));
         ClusterFile cf = new ClusterFile(in);
         cf.setBufferSize(100000000);
         for (ClusterWritable cw : cf) {

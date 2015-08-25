@@ -2,17 +2,17 @@ package stream4ClusterSentencesPurge;
 
 import KNN.Stream;
 import static KNN.Stream.getUnstemmedTokenizer;
-import io.github.repir.tools.lib.Log;
+import io.github.htools.lib.Log;
 import java.io.IOException;
 import kba1SourceToSentences.NewsDomains;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import Sentence.SentenceWritable;
-import io.github.repir.tools.collection.HashMap3;
-import io.github.repir.tools.extract.DefaultTokenizer;
-import io.github.repir.tools.hadoop.io.LongBoolWritable;
-import io.github.repir.tools.type.KV;
+import io.github.htools.collection.HashMap3;
+import io.github.htools.extract.DefaultTokenizer;
+import io.github.htools.hadoop.io.LongBoolWritable;
+import io.github.htools.type.KV;
 import kba1SourceToSentences.TitleFilter;
 
 /**

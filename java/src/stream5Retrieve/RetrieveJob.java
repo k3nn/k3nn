@@ -3,19 +3,19 @@ package stream5Retrieve;
 import MatchingClusterNode.MatchingClusterNodeWritable;
 import Cluster.ClusterFile;
 import Cluster.ClusterWritable;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.Conf;
-import io.github.repir.tools.hadoop.Job;
-import io.github.repir.tools.hadoop.io.ParamFileInputFormat;
-import io.github.repir.tools.io.EOCException;
-import io.github.repir.tools.io.HDFSPath;
-import io.github.repir.tools.io.buffer.BufferDelayedWriter;
-import io.github.repir.tools.io.buffer.BufferReaderWriter;
-import io.github.repir.tools.io.buffer.BufferSerializable;
-import io.github.repir.tools.io.struct.StructureReader;
-import io.github.repir.tools.io.struct.StructureWriter;
-import io.github.repir.tools.lib.MathTools;
+import io.github.htools.io.Datafile;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.Conf;
+import io.github.htools.hadoop.Job;
+import io.github.htools.hadoop.io.ParamFileInputFormat;
+import io.github.htools.io.EOCException;
+import io.github.htools.io.HDFSPath;
+import io.github.htools.io.buffer.BufferDelayedWriter;
+import io.github.htools.io.buffer.BufferReaderWriter;
+import io.github.htools.io.buffer.BufferSerializable;
+import io.github.htools.io.struct.StructureReader;
+import io.github.htools.io.struct.StructureWriter;
+import io.github.htools.lib.MathTools;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -71,7 +71,7 @@ public class RetrieveJob {
     public static void addInput(Job job, HDFSPath input, String topicfile) throws IOException {
         HashMap<Integer, TopicWritable> topics = getTopics(topicfile);
         for (Datafile df : input.getFiles()) {
-            String digit = df.getFilename().substring(df.getFilename().lastIndexOf(".") + 1);
+            String digit = df.getName().substring(df.getName().lastIndexOf(".") + 1);
             if (digit.length() > 0) {
                 int topicid = Integer.parseInt(digit);
                 //if (topicid != 23) {

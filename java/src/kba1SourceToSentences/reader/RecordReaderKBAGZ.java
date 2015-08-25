@@ -1,6 +1,6 @@
 package kba1SourceToSentences.reader;
 
-import io.github.repir.tools.hadoop.RecordReader;
+import io.github.htools.hadoop.RecordReader;
 import java.io.IOException;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;

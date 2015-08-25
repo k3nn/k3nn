@@ -1,13 +1,13 @@
 package secondary2clusters;
 
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.Conf;
-import io.github.repir.tools.hadoop.Job;
-import io.github.repir.tools.hadoop.io.InputFormat;
-import io.github.repir.tools.hadoop.io.LongLongWritable;
-import io.github.repir.tools.io.HDFSPath;
-import io.github.repir.tools.lib.DateTools;
+import io.github.htools.io.Datafile;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.Conf;
+import io.github.htools.hadoop.Job;
+import io.github.htools.hadoop.io.InputFormat;
+import io.github.htools.hadoop.io.LongLongWritable;
+import io.github.htools.io.HDFSPath;
+import io.github.htools.lib.DateTools;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;

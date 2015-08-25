@@ -1,8 +1,8 @@
 package CreateIDF;
 
 import KNN.Stream;
-import io.github.repir.tools.extract.DefaultTokenizer;
-import io.github.repir.tools.lib.Log;
+import io.github.htools.extract.DefaultTokenizer;
+import io.github.htools.lib.Log;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,12 +10,12 @@ import java.util.Map;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Mapper;
-import io.github.repir.tools.collection.HashMapInt;
-import io.github.repir.tools.extract.Content;
-import io.github.repir.tools.extract.WikipediaSourceSplitter;
-import io.github.repir.tools.extract.WikipediaSourceSplitter.Result;
-import io.github.repir.tools.search.ByteSearch;
-import io.github.repir.tools.search.ByteSearchPosition;
+import io.github.htools.collection.HashMapInt;
+import io.github.htools.extract.Content;
+import io.github.htools.extract.WikipediaSourceSplitter;
+import io.github.htools.extract.WikipediaSourceSplitter.Result;
+import io.github.htools.search.ByteSearch;
+import io.github.htools.search.ByteSearchPosition;
 import org.apache.hadoop.io.Text;
 
 /**

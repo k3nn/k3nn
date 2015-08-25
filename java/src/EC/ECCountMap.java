@@ -1,10 +1,10 @@
 package EC;
 
 import kba1SourceToSentences.*;
-import io.github.repir.tools.extract.HtmlTitleExtractor;
+import io.github.htools.extract.HtmlTitleExtractor;
 import Sentence.SentenceWritable;
-import io.github.repir.tools.hadoop.io.IntLongIntWritable;
-import io.github.repir.tools.lib.Log;
+import io.github.htools.hadoop.io.IntLongIntWritable;
+import io.github.htools.lib.Log;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;

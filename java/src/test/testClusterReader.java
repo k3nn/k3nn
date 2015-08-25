@@ -2,8 +2,8 @@ package test;
 
 import ClusterNode.ClusterNodeFile;
 import ClusterNode.ClusterNodeWritable;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.lib.Log;
+import io.github.htools.io.Datafile;
+import io.github.htools.lib.Log;
 import Sentence.SentenceFile;
 import Sentence.SentenceWritable;
 /**

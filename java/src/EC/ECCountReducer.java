@@ -2,9 +2,9 @@ package EC;
 
 import kba1SourceToSentences.*;
 import Sentence.SentenceWritable;
-import io.github.repir.tools.hadoop.io.IntLongIntWritable;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.io.IntLongStringIntWritable;
+import io.github.htools.hadoop.io.IntLongIntWritable;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.io.IntLongStringIntWritable;
 import java.io.IOException;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Reducer;

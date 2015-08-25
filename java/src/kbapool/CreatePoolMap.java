@@ -1,11 +1,11 @@
 package kbapool;
 
 import Sentence.SentenceWritable;
-import io.github.repir.tools.collection.HashMapSet;
-import io.github.repir.tools.hadoop.Conf;
-import io.github.repir.tools.hadoop.ContextTools;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.lib.StrTools;
+import io.github.htools.collection.HashMapSet;
+import io.github.htools.hadoop.Conf;
+import io.github.htools.hadoop.ContextTools;
+import io.github.htools.lib.Log;
+import io.github.htools.lib.StrTools;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;

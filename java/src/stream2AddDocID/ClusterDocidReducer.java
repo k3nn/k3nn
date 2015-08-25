@@ -4,12 +4,12 @@ import MatchingClusterNode.MatchingClusterNodeWritable;
 import Cluster.ClusterFile;
 import Cluster.ClusterWritable;
 import Cluster.NodeWritable;
-import io.github.repir.tools.collection.ArrayMap;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.io.HDFSPath;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.Conf;
-import io.github.repir.tools.hadoop.ContextTools;
+import io.github.htools.collection.ArrayMap;
+import io.github.htools.io.Datafile;
+import io.github.htools.io.HDFSPath;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.Conf;
+import io.github.htools.hadoop.ContextTools;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,7 +82,7 @@ public class ClusterDocidReducer extends Reducer<IntWritable, SentenceWritable, 
 
     public ClusterFile getOutFile() {
         HDFSPath dir = new HDFSPath(conf, conf.get("output"));
-        Datafile outfile = dir.getFile(infile.getFilename());
+        Datafile outfile = dir.getFile(infile.getName());
         return new ClusterFile(outfile);
     }
     

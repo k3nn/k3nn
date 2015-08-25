@@ -1,8 +1,8 @@
 package kba1SourceToSentences.reader;
 
-import io.github.repir.tools.hadoop.RecordReader;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.ContextTools;
+import io.github.htools.hadoop.RecordReader;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.ContextTools;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.hadoop.fs.FileSystem;

@@ -2,16 +2,16 @@ package kbapool;
 
 import Sentence.SentenceInputFormat;
 import Sentence.SentenceWritable;
-import io.github.repir.tools.collection.HashMap3;
-import io.github.repir.tools.collection.HashMapSet;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.Conf;
-import io.github.repir.tools.hadoop.Job;
-import io.github.repir.tools.hadoop.io.IntLongWritable;
-import io.github.repir.tools.io.FSPath;
-import io.github.repir.tools.io.HDFSPath;
-import io.github.repir.tools.type.KV;
+import io.github.htools.collection.HashMap3;
+import io.github.htools.collection.HashMapSet;
+import io.github.htools.io.Datafile;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.Conf;
+import io.github.htools.hadoop.Job;
+import io.github.htools.hadoop.io.IntLongWritable;
+import io.github.htools.io.FSPath;
+import io.github.htools.io.HDFSPath;
+import io.github.htools.type.KV;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,8 +60,8 @@ public class CreatePoolJob {
         for (String p : paths) {
             HDFSPath path = new HDFSPath(conf, p);
             for (Datafile df : path.getFiles()) {
-                if (!df.getFilename().endsWith(".titles")) {
-                    log.info("%s", df.getFilename());
+                if (!df.getName().endsWith(".titles")) {
+                    log.info("%s", df.getName());
                     TrecFile tf = new TrecFile(df);
                     for (TrecWritable w : tf) {
                         Item item = new Item(w.document, w.sentence, w.topic);

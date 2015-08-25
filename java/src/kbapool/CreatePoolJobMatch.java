@@ -1,9 +1,9 @@
 package kbapool;
 
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.Conf;
-import io.github.repir.tools.hadoop.Job;
+import io.github.htools.io.Datafile;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.Conf;
+import io.github.htools.hadoop.Job;
 import java.util.ArrayList;
 import static kbapool.CreatePoolJob.setup;
 import static kbapool.CreatePoolJob.temppool;

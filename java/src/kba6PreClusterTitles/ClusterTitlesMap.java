@@ -7,15 +7,15 @@ import KNN.Edge;
 import KNN.Node;
 import KNN.Stream;
 import KNN.NodeM;
-import io.github.repir.tools.collection.ArrayMap;
-import io.github.repir.tools.collection.ArrayMap3;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.io.HDFSPath;
-import io.github.repir.tools.extract.DefaultTokenizer;
-import io.github.repir.tools.lib.DateTools;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.lib.Profiler;
-import io.github.repir.tools.type.Tuple2;
+import io.github.htools.collection.ArrayMap;
+import io.github.htools.collection.ArrayMap3;
+import io.github.htools.io.Datafile;
+import io.github.htools.io.HDFSPath;
+import io.github.htools.extract.DefaultTokenizer;
+import io.github.htools.lib.DateTools;
+import io.github.htools.lib.Log;
+import io.github.htools.lib.Profiler;
+import io.github.htools.type.Tuple2;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -206,7 +206,7 @@ public class ClusterTitlesMap extends Mapper<LongWritable, SentenceWritable, Nul
      * Read the clustering at the end of yesterday.
      */
     public void readClusters() throws IOException {
-        HDFSPath dir = new HDFSPath(conf, conf.get("output")).getParent();
+        HDFSPath dir = new HDFSPath(conf, conf.get("output")).getParentPath();
         Date previousdate = DateTools.daysBefore(today, 1);
         Datafile df = dir.getFile(DateTools.FORMAT.Y_M_D.format(previousdate));
         if (df.exists() && df.getLength() > 0) {
@@ -255,8 +255,8 @@ public class ClusterTitlesMap extends Mapper<LongWritable, SentenceWritable, Nul
         for (Datafile d : filenames) {
             if (d.getLength() > 0) {
                 try {
-                    if (DateTools.FORMAT.Y_M_D.toDate(d.getFilename()).before(today)) {
-                        name = d.getFilename();
+                    if (DateTools.FORMAT.Y_M_D.toDate(d.getName()).before(today)) {
+                        name = d.getName();
                     }
                 } catch (ParseException ex) {
                     log.exception(ex, "findNextCluster invalid date %s", d);
@@ -279,7 +279,7 @@ public class ClusterTitlesMap extends Mapper<LongWritable, SentenceWritable, Nul
      */
     public HashMap<Long, String> getTitlesYesterday() {
         HashMap<Long, String> result = new HashMap();
-        HDFSPath dir = new HDFSPath(conf, conf.get("output")).getParent();
+        HDFSPath dir = new HDFSPath(conf, conf.get("output")).getParentPath();
         Date previousdate = DateTools.daysBefore(today, 1);
 
         Datafile df = dir.getFile(DateTools.FORMAT.Y_M_D.format(previousdate));
@@ -298,7 +298,7 @@ public class ClusterTitlesMap extends Mapper<LongWritable, SentenceWritable, Nul
      */
     public HashMap<Long, String> getTitlesToday() {
         HashMap<Long, String> result = new HashMap();
-        HDFSPath dir = new HDFSPath(conf, conf.get("input")).getParent();
+        HDFSPath dir = new HDFSPath(conf, conf.get("input")).getParentPath();
 
         Datafile df = dir.getFile(DateTools.FORMAT.Y_M_D.format(today));
         if (df.exists()) {

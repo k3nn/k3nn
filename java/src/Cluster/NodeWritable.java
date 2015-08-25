@@ -2,8 +2,9 @@ package Cluster;
 
 import java.util.ArrayList;
 import java.util.UUID;
+
 /**
- *
+ * A node that is used as cluster member in ClusterWritable.
  * @author jeroen
  */
 public class NodeWritable {
@@ -27,6 +28,9 @@ public class NodeWritable {
     public NodeWritable() {
     }
     
+    /**
+     * @return An array of the ID's of the node's nearest neighbors.
+     */
     public ArrayList<Long> getNN() {
         String parts[] = nnid.split(",");
         ArrayList<Long> list = new ArrayList();
@@ -38,6 +42,10 @@ public class NodeWritable {
         return list;
     }
 
+    /**
+     * @return An array with the similarity scores to the nearest neighbors. The
+     * scores are in the same order as the NN returned by getNN().
+     */
     public ArrayList<Double> getNNScore() {
         String parts[] = nnscore.split(",");
         ArrayList<Double> list = new ArrayList();
@@ -49,6 +57,10 @@ public class NodeWritable {
         return list;
     }
     
+    /**
+     * @return Original TREC UUID assigned to the document to which the node belongs,
+     * without the timestamp.
+     */
     public UUID getUUID() {
         String uuids = docid.substring(docid.indexOf('-')+1);
         if (uuids.length() != 32) {
@@ -63,8 +75,6 @@ public class NodeWritable {
         leastSigBits <<= 32;
         leastSigBits |= Long.valueOf(uuids.substring(24), 16);
 
-        UUID uuid = new UUID(mostSigBits, leastSigBits);
-
-        return uuid;
+        return new UUID(mostSigBits, leastSigBits);
     }    
 }

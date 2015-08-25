@@ -1,9 +1,9 @@
 package ECterms;
 
-import io.github.repir.tools.io.buffer.BufferDelayedWriter;
-import io.github.repir.tools.io.buffer.BufferReaderWriter;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.lib.MathTools;
+import io.github.htools.io.buffer.BufferDelayedWriter;
+import io.github.htools.io.buffer.BufferReaderWriter;
+import io.github.htools.lib.Log;
+import io.github.htools.lib.MathTools;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;

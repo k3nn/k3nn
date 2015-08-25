@@ -1,7 +1,7 @@
 package Cluster;
 
 import com.google.gson.reflect.TypeToken;
-import io.github.repir.tools.hadoop.json.Writable;
+import io.github.htools.hadoop.json.Writable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
@@ -25,13 +25,13 @@ public class ClusterWritable extends Writable<ClusterFile> {
     @Override
     public void read(ClusterFile f) {
         this.clusterid = f.clusterid.get();
-        this.nodes = f.urls.get();
+        this.nodes = f.nodes.get();
     }
 
     @Override
     public void write(ClusterFile file) {
         file.clusterid.set(clusterid);
-        file.urls.set(nodes);
+        file.nodes.set(nodes);
         file.write();
     }
     

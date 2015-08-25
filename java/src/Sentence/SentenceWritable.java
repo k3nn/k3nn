@@ -1,9 +1,9 @@
 package Sentence;
 
-import io.github.repir.tools.io.buffer.BufferDelayedWriter;
-import io.github.repir.tools.io.buffer.BufferReaderWriter;
-import io.github.repir.tools.lib.MathTools;
-import io.github.repir.tools.hadoop.tsv.Writable;
+import io.github.htools.io.buffer.BufferDelayedWriter;
+import io.github.htools.io.buffer.BufferReaderWriter;
+import io.github.htools.lib.MathTools;
+import io.github.htools.hadoop.tsv.Writable;
 import java.util.UUID;
 
 /**
@@ -37,6 +37,18 @@ public class SentenceWritable extends Writable<SentenceFile> {
         UUID uuid = UUID.fromString(uuidstring);
         documentIDHigh = uuid.getMostSignificantBits();
         documentIDLow = uuid.getLeastSignificantBits();
+    }
+    
+    public SentenceWritable clone() {
+        SentenceWritable s = new SentenceWritable();
+        s.content = content;
+        s.creationtime = creationtime;
+        s.documentIDHigh = this.documentIDHigh;
+        s.documentIDLow = this.documentIDLow;
+        s.domain = domain;
+        s.sentenceID = sentenceID;
+        s.sentenceNumber = sentenceNumber;
+        return s;
     }
     
     /**

@@ -2,10 +2,10 @@ package secondary1docs;
 
 import Cluster.ClusterWritable;
 import Cluster.NodeWritable;
-import io.github.repir.tools.collection.ArrayMap;
-import io.github.repir.tools.hadoop.ContextTools;
-import io.github.repir.tools.io.HDFSPath;
-import io.github.repir.tools.lib.Log;
+import io.github.htools.collection.ArrayMap;
+import io.github.htools.hadoop.ContextTools;
+import io.github.htools.io.HDFSPath;
+import io.github.htools.lib.Log;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;

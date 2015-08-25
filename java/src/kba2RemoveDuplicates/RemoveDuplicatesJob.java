@@ -1,15 +1,15 @@
 package kba2RemoveDuplicates;
 
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.Conf;
-import io.github.repir.tools.hadoop.io.InputFormat;
-import io.github.repir.tools.hadoop.Job;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.Conf;
+import io.github.htools.hadoop.io.InputFormat;
+import io.github.htools.hadoop.Job;
 import java.io.IOException;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import Sentence.SentenceInputFormat;
 import Sentence.SentenceWritable;
-import io.github.repir.tools.hadoop.io.DayPartitioner;
-import io.github.repir.tools.hadoop.io.LongLongWritable;
+import io.github.htools.hadoop.io.DayPartitioner;
+import io.github.htools.hadoop.io.LongLongWritable;
 import java.text.ParseException;
 
 /**

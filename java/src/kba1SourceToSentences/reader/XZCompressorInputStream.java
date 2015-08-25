@@ -7,7 +7,6 @@ import org.tukaani.xz.SingleXZInputStream;
 import org.tukaani.xz.XZInputStream;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 
-
 /**
  * XZ decompressor, wraps tukaani's xz codec.
  */
@@ -80,7 +79,6 @@ public class XZCompressorInputStream extends CompressorInputStream {
         }
     }
 
-    /** {@inheritDoc} */
     @Override
     public int read() throws IOException {
         int ret = in.read();
@@ -88,7 +86,6 @@ public class XZCompressorInputStream extends CompressorInputStream {
         return ret;
     }
 
-    /** {@inheritDoc} */
     @Override
     public int read(byte[] buf, int off, int len) throws IOException {
         int ret = in.read(buf, off, len);
@@ -96,24 +93,18 @@ public class XZCompressorInputStream extends CompressorInputStream {
         return ret;
     }
 
-    /** {@inheritDoc} */
     @Override
     public long skip(long n) throws IOException {
         return in.skip(n);
     }
 
-    /** {@inheritDoc} */
     @Override
     public int available() throws IOException {
         return in.available();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void close() throws IOException {
         in.close();
     }
-    	
-	
-    
 }

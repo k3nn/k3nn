@@ -1,7 +1,7 @@
 package stream3DocStream;
 
 import secondary1docs.*;
-import io.github.repir.tools.hadoop.io.OutputFormat;
+import io.github.htools.hadoop.io.OutputFormat;
 /**
  *
  * @author jeroen

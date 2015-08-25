@@ -1,10 +1,10 @@
 package kba1SourceToSentences;
 
-import io.github.repir.tools.search.ByteRegex;
-import io.github.repir.tools.search.ByteSearchPosition;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.io.ResourceDataIn;
-import io.github.repir.tools.lib.Log;
+import io.github.htools.search.ByteRegex;
+import io.github.htools.search.ByteSearchPosition;
+import io.github.htools.io.Datafile;
+import io.github.htools.io.ResourceDataIn;
+import io.github.htools.lib.Log;
 
 /**
  * assigns a domain ID, based on a URL, from a list of domains used

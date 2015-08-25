@@ -1,6 +1,6 @@
 package KNN;
 
-import io.github.repir.tools.lib.Log;
+import io.github.htools.lib.Log;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
@@ -9,7 +9,7 @@ import java.util.UUID;
  * Node that memorizes the terms, collection uuid and sentence number.
  * @author jeroen
  */
-public class NodeW extends NodeT {
+public class NodeW extends NodeTitle {
 
     static Log log = new Log(NodeW.class);
     public HashSet<String> terms;

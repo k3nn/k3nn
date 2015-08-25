@@ -1,6 +1,6 @@
 package kba1SourceToSentences;
 
-import io.github.repir.tools.io.web.UrlStrTools;
+import io.github.htools.io.web.UrlStrTools;
 
 /**
  * Cleans non content parts from titles extracted from HTML Pages of news

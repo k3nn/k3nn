@@ -9,12 +9,13 @@ import Cluster.NodeWritable;
 import KNN.Cluster;
 import KNN.Edge;
 import KNN.Stream;
-import io.github.repir.tools.extract.DefaultTokenizer;
-import io.github.repir.tools.lib.Log;
+import io.github.htools.extract.DefaultTokenizer;
+import io.github.htools.lib.Log;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import org.apache.hadoop.mapreduce.Mapper;
+import stream5Retrieve.Query;
 import stream5Retrieve.RetrieveTop3;
 import static stream5Retrieve.RetrieveTop3.getNN;
 import static stream5Retrieve.RetrieveTop3.getScores;
@@ -109,7 +110,7 @@ public class RetrieveMap extends Mapper<Setting, ClusterWritable, Setting, Match
             this.maxSentenceLengthWords = setting.length;
             this.minInformationGain = setting.gainratio;
             this.minRankObtained = setting.topk;
-            this.init(setting.topicid, setting.topicstart, setting.topicend, setting.query);
+            this.init(setting.topicid, setting.topicstart, setting.topicend, Query.create(tokenizer, setting.query));
             log.info("topic %d %d %d %s", setting.topicid, setting.topicstart, setting.topicend, setting.query);
             log.info("settings %f %f %d %d", setting.gainratio, setting.hours, setting.length, setting.topk);
         }
@@ -130,39 +131,39 @@ public class RetrieveMap extends Mapper<Setting, ClusterWritable, Setting, Match
             context.write(key, record);
         }
         
-    public void stream(Cluster<N> c) throws IOException, InterruptedException {
-        N candidateNode = (N) c.getNodes().get(c.getNodes().size() - 1);
-        c = c.stripCluster();
+    @Override
+    public void stream(Cluster<N> cluster) throws IOException, InterruptedException {
+        N candidateNode = (N) cluster.getNodes().get(cluster.getNodes().size() - 1);
+        cluster = cluster.stripCluster();
 
         // tokenize sentence to list of unique non stop words
         HashSet<String> candidateNodeTermSet = new HashSet(tokenizer.tokenize(candidateNode.getContent()));
         ArrayList<String> candidateNodeTerms = new ArrayList(candidateNodeTermSet);
 
-        boolean contains = c.getNodes().contains(candidateNode);
-        boolean clusterqualifies = qualifies(c, queryterms);
+        boolean contains = cluster.getNodes().contains(candidateNode);
+        boolean clusterqualifies = qualifies(cluster, query);
         boolean nodeQualifies = qualifyLength(candidateNode, candidateNodeTermSet);
 
         if (contains && clusterqualifies && nodeQualifies) { // todo extend relevance model if sentence does not qualify and using restrictions
-            relevanceVector.addPre(c, candidateNode);
+            Candidate candidate = new Candidate(candidateNode, cluster, candidateNodeTerms);
+            relevanceVector.addPre(cluster, candidateNode);
             relevanceVector.removeExpired(candidateNode.getCreationTime());
-            rankEmittedSentences();
-            double similarityCandidateNode = relevanceVector.cosSim(candidateNodeTerms);
-            double similarityRankR = (emittedSentences.size() >= minRankObtained) ? emittedSentences.getKey(minRankObtained - 1) : 0;
-            boolean rankqualifies = (emittedSentences.size() < minRankObtained || similarityCandidateNode >= similarityRankR);
+            rankEmittedSentences(poolEmittedSentences);
+            candidate.relevance = candidate.vector.cossim(relevanceVector);
+            double similarityRankR = (poolEmittedSentences.size() >= minRankObtained) ? poolEmittedSentences.get(minRankObtained - 1).relevance : 0;
+            boolean rankqualifies = (poolEmittedSentences.size() < minRankObtained || candidate.relevance >= similarityRankR);
 
-            HashSet<String> titleminusquery = new HashSet(candidateNodeTerms);
-            titleminusquery.removeAll(queryterms);
-            double gain = knownwords.estimateInformationGain(candidateNodeTerms, c, candidateNode);
-            double gainthreshold = ((titleminusquery.size() * (candidateNodeTerms.size() - 1)) * minInformationGain);
-            //gainthreshold = (((candidateNodeTerms.size() - queryterms.size()) * (candidateNodeTerms.size() - 1)) * minInformationGain);
-            boolean gainqualifies = gain >= gainthreshold;
+            boolean gainqualifies = candidate.gainQualifies();
 
-            boolean oldinfoqualifies = knownwords.getOldInfo(candidateNodeTerms, queryterms) > 0;
+            boolean oldinfoqualifies = knownwords.getOldInfo(candidateNodeTerms, query, 1);
 
             if (oldinfoqualifies && gainqualifies && rankqualifies && ((NodeD)candidateNode).sentence != 0) {
                 emit(topicID, candidateNode, candidateNode.getContent());
                 knownwords.addKownWordCombinations(candidateNodeTerms);
-                emittedSentences.add(similarityCandidateNode, candidateNode);
+                Emission e = candidate.getEmission();
+                emittedSentences.add(e);
+                if (emittedSentences != poolEmittedSentences)
+                    poolEmittedSentences.add(e);
             }
             relevanceVector.addPost(candidateNode);
         }

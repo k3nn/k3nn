@@ -9,12 +9,13 @@ import Cluster.NodeWritable;
 import KNN.Cluster;
 import KNN.Edge;
 import KNN.Stream;
-import io.github.repir.tools.extract.DefaultTokenizer;
-import io.github.repir.tools.lib.Log;
+import io.github.htools.extract.DefaultTokenizer;
+import io.github.htools.lib.Log;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import org.apache.hadoop.mapreduce.Mapper;
+import stream5Retrieve.Query;
 import stream5Retrieve.RetrieveTop3;
 import static stream5Retrieve.RetrieveTop3.getNN;
 import static stream5Retrieve.RetrieveTop3.getScores;
@@ -109,7 +110,7 @@ public class RetrieveMap extends Mapper<Setting, ClusterWritable, Setting, Match
             this.maxSentenceLengthWords = setting.length;
             this.minInformationGain = setting.gainratio;
             this.minRankObtained = setting.topk;
-            this.init(setting.topicid, setting.topicstart, setting.topicend, setting.query);
+            this.init(setting.topicid, setting.topicstart, setting.topicend, Query.create(tokenizer, setting.query));
             log.info("topic %d %d %d %s", setting.topicid, setting.topicstart, setting.topicend, setting.query);
             log.info("settings %f %f %d %d", setting.gainratio, setting.hours, setting.length, setting.topk);
         }

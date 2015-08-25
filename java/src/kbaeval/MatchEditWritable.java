@@ -1,8 +1,8 @@
 package kbaeval;
 
-import io.github.repir.tools.io.buffer.BufferDelayedWriter;
-import io.github.repir.tools.io.buffer.BufferReaderWriter;
-import io.github.repir.tools.hadoop.tsv.Writable;
+import io.github.htools.io.buffer.BufferDelayedWriter;
+import io.github.htools.io.buffer.BufferReaderWriter;
+import io.github.htools.hadoop.tsv.Writable;
 /**
  *
  * @author jeroen

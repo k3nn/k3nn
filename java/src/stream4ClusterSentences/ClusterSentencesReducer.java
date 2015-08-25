@@ -8,10 +8,10 @@ import KNN.NodeD;
 import Cluster.ClusterFile;
 import Cluster.ClusterWritable;
 import Cluster.NodeWritable;
-import io.github.repir.tools.extract.DefaultTokenizer;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.io.LongLongWritable;
+import io.github.htools.extract.DefaultTokenizer;
+import io.github.htools.io.Datafile;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.io.LongLongWritable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,8 +20,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import Sentence.SentenceWritable;
-import io.github.repir.tools.hadoop.io.IntBoolWritable;
-import io.github.repir.tools.hadoop.io.LongBoolWritable;
+import io.github.htools.hadoop.io.IntBoolWritable;
+import io.github.htools.hadoop.io.LongBoolWritable;
 
 /**
  *

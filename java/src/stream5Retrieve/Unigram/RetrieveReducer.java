@@ -3,10 +3,10 @@ package stream5Retrieve.Unigram;
 import stream5Retrieve.NoTitle.*;
 import MatchingClusterNode.MatchingClusterNodeFile;
 import MatchingClusterNode.MatchingClusterNodeWritable;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.io.HDFSPath;
-import static io.github.repir.tools.lib.PrintTools.sprintf;
+import io.github.htools.io.Datafile;
+import io.github.htools.lib.Log;
+import io.github.htools.io.HDFSPath;
+import static io.github.htools.lib.PrintTools.sprintf;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +43,7 @@ public class RetrieveReducer extends Reducer<Setting, MatchingClusterNodeWritabl
     public void reduce(Setting key, Iterable<MatchingClusterNodeWritable> values, Context context) throws IOException, InterruptedException {
         if (trecfile == null) {
             Datafile df = outpath.getFile(sprintf("results.%d.%d.%d.%d", (int) (100 * key.gainratio), (int) (10 * key.hours), key.length, key.topk));
-            log.info("%s", df.getFilename());
+            log.info("%s", df.getName());
             trecfile = new TrecFile(df);
             trecfile.openWrite();
             df = outpath.getFile(sprintf("results.%d.%d.%d.%d.titles", (int) (100 * key.gainratio), (int) (10 * key.hours), key.length, key.topk));

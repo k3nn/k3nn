@@ -2,10 +2,10 @@ package stream1ClusterTitles;
 
 import Cluster.ClusterFile;
 import Cluster.ClusterWritable;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.io.HDFSPath;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.ContextTools;
+import io.github.htools.io.Datafile;
+import io.github.htools.io.HDFSPath;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.ContextTools;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.apache.hadoop.conf.Configuration;
@@ -28,7 +28,7 @@ public class ClusterTitlesReducer extends Reducer<IntWritable, ClusterWritable, 
         ArrayList<Datafile> topicFiles = ClusterTitlesJob.topicFiles(conf);
         HDFSPath path = new HDFSPath(conf, conf.get("output"));
         int reducer = ContextTools.getTaskID(context);
-        Datafile df = path.getFile(topicFiles.get(reducer).getFilename());
+        Datafile df = path.getFile(topicFiles.get(reducer).getName());
         cf = new ClusterFile(df);
     }
 

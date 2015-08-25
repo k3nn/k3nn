@@ -1,6 +1,6 @@
 package test;
 
-import io.github.repir.tools.lib.Log;
+import io.github.htools.lib.Log;
 import java.util.UUID;
 /**
  *

@@ -1,11 +1,11 @@
 package KNN;
 
-import io.github.repir.tools.collection.ArrayMap;
-import io.github.repir.tools.collection.HashMapDouble;
-import io.github.repir.tools.collection.HashMapInt;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.lib.MathTools;
-import io.github.repir.tools.type.Tuple2Comparable;
+import io.github.htools.collection.ArrayMap;
+import io.github.htools.collection.HashMapDouble;
+import io.github.htools.collection.HashMapInt;
+import io.github.htools.lib.Log;
+import io.github.htools.lib.MathTools;
+import io.github.htools.type.Tuple2Comparable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;

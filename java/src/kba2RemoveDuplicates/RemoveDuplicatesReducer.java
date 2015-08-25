@@ -2,11 +2,11 @@ package kba2RemoveDuplicates;
 
 import Sentence.SentenceFile;
 import Sentence.SentenceWritable;
-import io.github.repir.tools.hadoop.ContextTools;
-import io.github.repir.tools.hadoop.io.DayPartitioner;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.io.HDFSPath;
+import io.github.htools.hadoop.ContextTools;
+import io.github.htools.hadoop.io.DayPartitioner;
+import io.github.htools.lib.Log;
+import io.github.htools.io.Datafile;
+import io.github.htools.io.HDFSPath;
 import java.io.IOException;
 import kba1SourceToSentences.ReducerKeysDays;
 import org.apache.hadoop.conf.Configuration;

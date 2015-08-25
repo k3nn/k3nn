@@ -2,10 +2,10 @@ package kba6RenumberClustersAfterGap;
 
 import ClusterNode.ClusterNodeFile;
 import ClusterNode.ClusterNodeWritable;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.io.HDFSPath;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.ContextTools;
+import io.github.htools.io.Datafile;
+import io.github.htools.io.HDFSPath;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.ContextTools;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;

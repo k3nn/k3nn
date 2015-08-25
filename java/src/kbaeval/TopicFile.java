@@ -1,7 +1,7 @@
 package kbaeval;
 
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.hadoop.xml.File;
+import io.github.htools.io.Datafile;
+import io.github.htools.hadoop.xml.File;
 import java.util.HashMap;
 
 /**

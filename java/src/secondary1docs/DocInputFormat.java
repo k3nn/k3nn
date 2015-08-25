@@ -1,6 +1,6 @@
 package secondary1docs;
 
-import io.github.repir.tools.hadoop.io.StructuredFileInputFormat;
+import io.github.htools.hadoop.io.StructuredFileInputFormat;
 
 public class DocInputFormat extends StructuredFileInputFormat<DocFile, DocWritable> {
 

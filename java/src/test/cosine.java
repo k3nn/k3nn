@@ -2,8 +2,8 @@ package test;
 
 import KNN.IINodesIDF;
 import KNN.NodeMagnitude;
-import io.github.repir.tools.hadoop.Conf;
-import io.github.repir.tools.lib.Log;
+import io.github.htools.hadoop.Conf;
+import io.github.htools.lib.Log;
 import java.util.HashSet;
 import stream4ClusterSentencesPurge.IDF.ClusterSentencesReducer.LocalStream;
 /**

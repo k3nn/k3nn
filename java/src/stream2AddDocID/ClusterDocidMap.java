@@ -1,7 +1,7 @@
 package stream2AddDocID;
 
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.Conf;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.Conf;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,9 +1,9 @@
 package kba4TitleDeduplication;
 
 import Sentence.SentenceWritable;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.lib.MathTools;
-import io.github.repir.tools.hadoop.io.IntLongWritable;
+import io.github.htools.lib.Log;
+import io.github.htools.lib.MathTools;
+import io.github.htools.hadoop.io.IntLongWritable;
 import java.io.IOException;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;

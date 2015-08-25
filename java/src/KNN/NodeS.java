@@ -1,7 +1,7 @@
 package KNN;
 
-import io.github.repir.tools.lib.Log;
-import static io.github.repir.tools.lib.PrintTools.sprintf;
+import io.github.htools.lib.Log;
+import static io.github.htools.lib.PrintTools.sprintf;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -9,7 +9,7 @@ import java.util.HashSet;
  * Extension of NodeT that also holds an array of tokenized terms.
  * @author jeroen
  */
-public class NodeS extends NodeT {
+public class NodeS extends NodeTitle {
 
     static Log log = new Log(NodeS.class);
     HashSet<String> terms = new HashSet();

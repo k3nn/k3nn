@@ -7,11 +7,11 @@ import KNN.Edge;
 import KNN.Node;
 import KNN.Stream;
 import KNN.NodeS;
-import io.github.repir.tools.collection.ArrayMap;
-import io.github.repir.tools.extract.DefaultTokenizer;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.lib.ArgsParser;
-import io.github.repir.tools.lib.Log;
+import io.github.htools.collection.ArrayMap;
+import io.github.htools.extract.DefaultTokenizer;
+import io.github.htools.io.Datafile;
+import io.github.htools.lib.ArgsParser;
+import io.github.htools.lib.Log;
 import java.util.ArrayList;
 import java.util.HashSet;
 

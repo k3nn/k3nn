@@ -1,10 +1,10 @@
 package kba5TitleSortTimestamp;
 
-import io.github.repir.tools.io.HDFSPath;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.Conf;
-import io.github.repir.tools.hadoop.io.DayPartitioner;
-import io.github.repir.tools.hadoop.Job;
+import io.github.htools.io.HDFSPath;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.Conf;
+import io.github.htools.hadoop.io.DayPartitioner;
+import io.github.htools.hadoop.Job;
 import java.io.IOException;
 import java.text.ParseException;
 import org.apache.hadoop.fs.Path;

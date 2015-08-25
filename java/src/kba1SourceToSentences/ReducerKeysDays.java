@@ -1,8 +1,8 @@
 package kba1SourceToSentences;
 
-import io.github.repir.tools.lib.DateTools;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.io.ReducerKeys;
+import io.github.htools.lib.DateTools;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.io.ReducerKeys;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;

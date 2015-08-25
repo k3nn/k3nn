@@ -1,9 +1,9 @@
 package kba7TopicMatchingSentences;
 
 import KNN.Stream;
-import io.github.repir.tools.extract.DefaultTokenizer;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.io.IntLongWritable;
+import io.github.htools.extract.DefaultTokenizer;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.io.IntLongWritable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,7 +21,7 @@ public class TopicMatchingSentencesMap extends Mapper<LongWritable, SentenceWrit
 
     public static final Log log = new Log(TopicMatchingSentencesMap.class);
     Configuration conf;
-    static DefaultTokenizer tokenizer = Stream.getUnstemmedTokenizer();
+    public static DefaultTokenizer tokenizer = Stream.getUnstemmedTokenizer();
     public ArrayList<HashSet<String>> topicterms;
     public HashSet<String> allterms;
     public ArrayList<TopicWritable> topics;

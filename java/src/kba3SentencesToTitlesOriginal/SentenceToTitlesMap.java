@@ -1,12 +1,12 @@
 package kba3SentencesToTitlesOriginal;
 
 import kba3SentencesToTitles.*;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.io.HDFSPath;
+import io.github.htools.io.Datafile;
+import io.github.htools.io.HDFSPath;
 import Sentence.SentenceWritable;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.type.Tuple2;
-import io.github.repir.tools.hadoop.LogFile;
+import io.github.htools.lib.Log;
+import io.github.htools.type.Tuple2;
+import io.github.htools.hadoop.LogFile;
 import java.io.IOException;
 import java.util.HashSet;
 import kba1SourceToSentences.NewsDomains;

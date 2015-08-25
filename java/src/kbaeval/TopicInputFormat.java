@@ -1,6 +1,6 @@
 package kbaeval;
 
-import io.github.repir.tools.hadoop.io.StructuredFileInputFormat;
+import io.github.htools.hadoop.io.StructuredFileInputFormat;
 
 public class TopicInputFormat extends StructuredFileInputFormat<TopicFile, TopicWritable> {
 

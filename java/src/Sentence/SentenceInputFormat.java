@@ -1,7 +1,7 @@
 package Sentence;
 
-import io.github.repir.tools.hadoop.io.InputFormat;
-import io.github.repir.tools.hadoop.io.StructuredFileInputFormat;
+import io.github.htools.hadoop.io.InputFormat;
+import io.github.htools.hadoop.io.StructuredFileInputFormat;
 
 public class SentenceInputFormat extends StructuredFileInputFormat<SentenceFile, SentenceWritable> {
 

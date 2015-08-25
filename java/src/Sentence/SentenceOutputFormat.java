@@ -1,7 +1,7 @@
 package Sentence;
 
-import io.github.repir.tools.hadoop.Job;
-import io.github.repir.tools.hadoop.io.OutputFormat;
+import io.github.htools.hadoop.Job;
+import io.github.htools.hadoop.io.OutputFormat;
 /**
  *
  * @author jeroen

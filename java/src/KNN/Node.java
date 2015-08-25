@@ -1,9 +1,9 @@
 package KNN;
 
 import static KNN.Stream.log;
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.lib.MathTools;
-import static io.github.repir.tools.lib.PrintTools.sprintf;
+import io.github.htools.lib.Log;
+import io.github.htools.lib.MathTools;
+import static io.github.htools.lib.PrintTools.sprintf;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

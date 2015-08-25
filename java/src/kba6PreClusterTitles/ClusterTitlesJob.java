@@ -1,9 +1,9 @@
 package kba6PreClusterTitles;
 
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.ConfSetting;
-import io.github.repir.tools.hadoop.Conf;
-import io.github.repir.tools.hadoop.Job;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.ConfSetting;
+import io.github.htools.hadoop.Conf;
+import io.github.htools.hadoop.Job;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import Sentence.SentenceInputFormat;

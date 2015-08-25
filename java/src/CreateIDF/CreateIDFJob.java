@@ -1,13 +1,13 @@
 package CreateIDF;
 
-import io.github.repir.tools.lib.Log;
-import io.github.repir.tools.hadoop.Conf;
-import io.github.repir.tools.hadoop.Job;
+import io.github.htools.lib.Log;
+import io.github.htools.hadoop.Conf;
+import io.github.htools.hadoop.Job;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
-import io.github.repir.EntityReader.EntityReaderWikipedia;
-import io.github.repir.EntityReader.MapReduce.EntityReaderInputFormat;
+import io.github.htools.hadoop.io.archivereader.ReaderWikipedia;
+import io.github.htools.hadoop.io.archivereader.ReaderInputFormat;
 import org.apache.hadoop.io.Text;
 
 public class CreateIDFJob {
@@ -23,7 +23,7 @@ public class CreateIDFJob {
         conf.setReduceSpeculativeExecution(false);
         conf.set("repository.inputdir", conf.get("input"));
         //conf.setBoolean("repository.testinputformat", true);
-        conf.set("repository.entityreader", EntityReaderWikipedia.class.getSimpleName());
+        conf.set("repository.entityreader", ReaderWikipedia.class.getSimpleName());
         conf.setBoolean("repository.splitablesource", true);
 
         String input = conf.get("input");
@@ -31,7 +31,7 @@ public class CreateIDFJob {
 
         Job job = new Job(conf, input, out);
 
-        new EntityReaderInputFormat(job);
+        new ReaderInputFormat(job);
 
         job.setNumReduceTasks(1);
         job.setMapperClass(CreateIDFMap.class);

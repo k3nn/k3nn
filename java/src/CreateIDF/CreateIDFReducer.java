@@ -1,7 +1,7 @@
 package CreateIDF;
 
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.lib.Log;
+import io.github.htools.io.Datafile;
+import io.github.htools.lib.Log;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;

@@ -1,19 +1,19 @@
 package Cluster;
 
 import com.google.gson.reflect.TypeToken;
-import io.github.repir.tools.io.Datafile;
-import io.github.repir.tools.hadoop.json.File;
+import io.github.htools.io.Datafile;
+import io.github.htools.hadoop.json.File;
 import java.util.ArrayList;
 
 /**
- *
+ * Stores clusters of nodes.
  * @author jeroen
  */
 public class ClusterFile extends File<ClusterWritable> {
 
     public IntField clusterid = addInt("clusterid");
-    public JsonArrayField<NodeWritable> urls = 
-            this.addJsonArray("urls", new TypeToken<ArrayList<NodeWritable>>(){}.getType());
+    public JsonArrayField<NodeWritable> nodes = 
+            this.addJsonArray("nodes", new TypeToken<ArrayList<NodeWritable>>(){}.getType());
     
     public ClusterFile(Datafile df) {
         super(df);
