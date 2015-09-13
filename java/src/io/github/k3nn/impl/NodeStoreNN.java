@@ -1,4 +1,4 @@
-package io.hithub.k3nn.impl;
+package io.github.k3nn.impl;
 
 import io.github.k3nn.NodeStore;
 import io.github.k3nn.Score;

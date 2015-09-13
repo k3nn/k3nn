@@ -1,4 +1,4 @@
-package io.hithub.k3nn.impl;
+package io.github.k3nn.impl;
 
 import io.github.htools.fcollection.FHashMapInt;
 import io.github.htools.lib.Log;

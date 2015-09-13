@@ -1,7 +1,7 @@
 package io.github.k3nn;
 
-import io.hithub.k3nn.impl.NodeStoreIIBinary;
-import io.hithub.k3nn.impl.NodeM;
+import io.github.k3nn.impl.NodeStoreIIBinary;
+import io.github.k3nn.impl.NodeM;
 import io.github.htools.collection.ArrayMapDouble;
 import io.github.htools.collection.HashMapInt;
 import io.github.htools.extract.DefaultTokenizer;

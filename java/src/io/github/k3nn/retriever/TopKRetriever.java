@@ -4,7 +4,7 @@ import io.github.k3nn.Cluster;
 import io.github.k3nn.Edge;
 import io.github.k3nn.ClusteringGraph;
 import io.github.k3nn.Node;
-import io.hithub.k3nn.impl.NodeSentence;
+import io.github.k3nn.impl.NodeSentence;
 import io.github.k3nn.Cluster;
 import io.github.k3nn.ClusteringGraph;
 import io.github.k3nn.Edge;
