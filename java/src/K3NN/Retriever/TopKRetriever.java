@@ -1,12 +1,14 @@
-package stream5Retrieve;
+package k3nn.retriever;
 
-import KNN.Cluster;
-import KNN.Edge;
-import KNN.Stream;
-import KNN.Node;
-import KNN.NodeD;
-import Cluster.ClusterWritable;
-import Cluster.NodeWritable;
+import k3nn.Cluster;
+import k3nn.Edge;
+import k3nn.ClusteringGraph;
+import k3nn.Node;
+import k3nn.impl.NodeSentence;
+import k3nn.Cluster;
+import k3nn.ClusteringGraph;
+import k3nn.Edge;
+import k3nn.Node;
 import io.github.htools.collection.ArrayMap;
 import io.github.htools.collection.ArrayMap3;
 import io.github.htools.collection.HashMapInt;
@@ -14,6 +16,7 @@ import io.github.htools.collection.HashMapSet;
 import io.github.htools.collection.OrderedQueueMap;
 import io.github.htools.io.Datafile;
 import io.github.htools.extract.DefaultTokenizer;
+import io.github.htools.fcollection.FHashSet;
 import io.github.htools.lib.Log;
 import io.github.htools.type.TermVectorInt;
 import java.io.IOException;
@@ -23,17 +26,47 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import kbaeval.TopicFile;
-import kbaeval.TopicWritable;
+import java.util.Set;
+import k3nn.query.Query;
 
-public abstract class RetrieveTop3<N extends Node> {
+/**
+ * A TopK Retriever processes an online stream of query matching sentence
+ * cluster snapshots, and qualifies whether the candidate sentence (i.e. last
+ * sentence added) of such a cluster snapshot qualifies to add to a summary that
+ * aims to optimize an F-measure over comprehensiveness and gain. Within these
+ * clusters, the most salient sentences are considered to be the core nodes,
+ * since these are most similar to other sentences (e.g. in content and
+ * proximity in publication time). The general process first checks some general
+ * constraints, such as sentence length, whether the sentence is a core sentence
+ * (or closely related to the core). A relevance model maintained over all
+ * salient sentences that were seen over the previous h hours. In general, a
+ * candidate sentence qualifies when it satisfies novelty and relevance
+ * constraints.
+ * <p/>
+ * A retriever has parameters for l the maximum sentence length, h the time in
+ * hours salient information is kept in the relevance model, g the minimum
+ * estimated percentage of novel information and r the rank a sentence has to
+ * obtain to qualify when ranked amongst already qualified sentences against the
+ * relevance model.
+ * <p/>
+ *
+ * @author Jeroen
+ * @param <N>
+ */
+public abstract class TopKRetriever<N extends Node> {
 
-    private static final Log log = new Log(RetrieveTop3.class);
+    private static final Log log = new Log(TopKRetriever.class);
 
     // Map of Similarity Scores for Nodes that were emitted
-    protected ArrayList<Emission> emittedSentences;
-    protected ArrayList<Emission> poolEmittedSentences;
+    protected ArrayList<Sentence> emittedSentences;
+    // Used when mixed retrievers are used with a shared pool of emitted sentences
+    // Not used by default.
+    protected ArrayList<Sentence> poolEmittedSentences;
+    // reflects words or word-combinations in qualified sentences that is used
+    // to estimate the gain/novelty of a candidate sentence
     protected KnownWords knownwords;
+    // a model over the salient information seen in the last h-hours that 
+    // reflects the most recent interest in the topic in the news stream
     protected RelevanceVector relevanceVector;
     // tokenizes on non-alphfanumeric chars, remove stopwords, lowercase, no stemmer
     protected DefaultTokenizer tokenizer = getTokenizer();
@@ -45,6 +78,7 @@ public abstract class RetrieveTop3<N extends Node> {
     protected int topicID;
 
     protected boolean watch; // for debugging
+    // The topic's query, used for checking if sentenves contain query terms
     protected Query query;
 
     // requirements to qualify sentences for emission: minRankObtained=r,
@@ -55,16 +89,6 @@ public abstract class RetrieveTop3<N extends Node> {
     public double windowRelevanceModelHours = 1;
     protected int windowRelevanceModelSeconds;
 
-    public void add(RetrieveTop3<N> other) {
-        emittedSentences.addAll(other.emittedSentences);
-        if (knownwords != other.knownwords) {
-            knownwords.add(other.knownwords);
-        }
-        relevanceVector.add(other.relevanceVector);
-    }
-
-    public abstract void emit(int topic, N u, String title) throws IOException, InterruptedException;
-
     /**
      * Initialize streaming sentence clusters and qualifying sentences
      *
@@ -74,146 +98,189 @@ public abstract class RetrieveTop3<N extends Node> {
      * @param query
      */
     public void init(int topicid, long topicstart, long topicend, Query query) throws IOException {
+        // set topic specific information. For qualification, only senteneces with
+        // a creation time between topicstart and topicend should be considered.
         this.topicID = topicid;
         this.topicStartTime = topicstart;
         this.topicEndTime = topicend;
+        this.query = query;
         windowRelevanceModelSeconds = (int) (windowRelevanceModelHours * 60 * 60);
+        
+        // by default, a Retriever has it's own pool, therefore the shared pool just
+        // points to this.
         emittedSentences = new ArrayList();
         poolEmittedSentences = emittedSentences;
+        
+        // initialize the models, the query terms are considered to be permanently
+        // known and relevant information, therefore when there is no information seen
+        // for h hours, the relevance model should revert to the initial query terms.
         knownwords = createKnownWords();
-        this.query = query;
         relevanceVector = new RelevanceVector(this.query.getTerms());
         knownwords.addKownWordCombinations(this.query);
     }
 
+//    /**
+//     * Add the model 
+//     * @param other 
+//     */
+//    public void add(TopKRetriever<N> other) {
+//        emittedSentences.addAll(other.emittedSentences);
+//        if (knownwords != other.knownwords) {
+//            knownwords.add(other.knownwords);
+//        }
+//        relevanceVector.add(other.relevanceVector);
+//    }
+
+    /**
+     * Is called whenever the candidate sentence of a streamed cluster is qualified,
+     * therefore this should be implemented to capture the results of the retriever.
+     */
+    public abstract void emit(int topic, N u, String title) throws IOException, InterruptedException;
+
+    /**
+     * Overridable method to create a KnownWords model, so it can be easily replaced
+     * by an alternative implementation. By default, a model over 2-word combinations
+     * is used.
+     * @return 
+     */
     protected KnownWords createKnownWords() {
-        return new KnownWordsBigram();
+        return new KnownWordsCombinations();
     }
 
+    /**
+     * Overridable method to create a Tokenizer so it can be easily replaced 
+     * by an alternative implementation. By default, content is tokenized on 
+     * non alphanumeric characters, lowercased, stop words removed, but not stemmed.
+     */
     public DefaultTokenizer getTokenizer() {
-        return Stream.getUnstemmedTokenizer();
+        return ClusteringGraph.getUnstemmedTokenizer();
     }
 
-    public void stream(Cluster<N> cluster) throws IOException, InterruptedException {
+    /**
+     * Inspects the candidate sentence (i.e. last) of a cluster and calls emit
+     * when it qualifies. In the process, the relevance model and model of emitted
+     * sentences are updated.
+     */
+    public void qualify(Cluster<N> cluster) throws IOException, InterruptedException {
         // construct a cluster object from the streamclusterwritable
         //Cluster<N> c = createCluster(writable);
         // the last sentence is the only sentence that can qualify for emission
         N candidateNode = (N) cluster.getNodes().get(cluster.getNodes().size() - 1);
         // for the BaseCluster variant, strip nodes that are not connected back to
         // returned result is a shallow clone of the original cluster
-        cluster = cluster.stripCluster();
+        cluster.stripCluster();
 
         // tokenize sentence to list of unique non stop words
         HashSet<String> candidateNodeTermSet = new HashSet(tokenizer.tokenize(candidateNode.getContent()));
         ArrayList<String> candidateNodeTerms = new ArrayList(candidateNodeTermSet);
 
+        // for pre-qualification, the candidate must be a salient sentences (e.g.
+        // remain as a member when the cluster s stripped of non salient sentences)
+        // the cluster must qualify (e.g. one of its sentences contains all query terms)
+        // and the candidate must qualify (e.g. creation time falls within the
+        // topic interval and the length must not exceed the maximum l. 
         boolean contains = cluster.getNodes().contains(candidateNode);
         boolean clusterqualifies = qualifies(cluster, query);
         boolean nodeQualifies = qualifyLength(candidateNode, candidateNodeTermSet);
 
-        watch = false;
-        if (watch) {
-            log.info("url %d %d %s %s", candidateNode.getID(), candidateNode.getDomain(), candidateNode.getContent(), candidateNodeTermSet);
-            for (Node b : cluster.getNodes()) {
-                log.info("base %d %d %s", b.getID(), b.getDomain(), b.getContent());
-            }
-            log.info("%d %b %b %b %s", candidateNode.getID(), contains, clusterqualifies, nodeQualifies, candidateNode.getContent());
-        }
         if (contains && clusterqualifies && nodeQualifies) { // todo extend relevance model if sentence does not qualify and using restrictions
+            Sentence candidate = new Sentence(candidateNode, cluster, candidateNodeTerms);
+
+            // add all other salient sentences except the candidate sentence to
+            // the relevanec model
             relevanceVector.addPre(cluster, candidateNode);
+            
+            // removes expired sentences from the relevance model
             relevanceVector.removeExpired(candidateNode.getCreationTime());
-            Candidate candidate = new Candidate(candidateNode, cluster, candidateNodeTerms);
+
+            // ranks already emitted sentences against the relevance model and
+            // determine if the candidate sentence ranks above position minRankObtained
             rankEmittedSentences(poolEmittedSentences);
             candidate.relevance = candidate.vector.cossim(relevanceVector);
             double similarityRankR = (poolEmittedSentences.size() >= minRankObtained) ? poolEmittedSentences.get(minRankObtained - 1).relevance : 0;
             boolean rankqualifies = (poolEmittedSentences.size() < minRankObtained || candidate.relevance >= similarityRankR);
 
+            // determine wether the candidate sentence is sufficiently novel
             boolean gainqualifies = candidate.gainQualifies();
 
-            boolean oldinfoqualifies = knownwords.getOldInfo(candidateNodeTerms, query, 1);
+            // determine wether the candidate sentence contain information already seen
+            // for ICTIR we used 2, for TREC 2015 we used 1
+            boolean oldinfoqualifies = knownwords.getOldInfo(candidateNodeTerms, query, 2);
 
-            if (watch) {
-                for (Node b : cluster.getNodes()) {
-                    log.info("base %d %d %s", b.getID(), b.getDomain(), b.getContent());
-                }
-                log.info("%d %b %b %b %s", candidateNode.getID(), contains, clusterqualifies, nodeQualifies, candidateNode.getContent());
-                log.info("%s", this.relevanceVector);
-                log.info("%d %d %s", cluster.getID(), candidateNode.getID(), candidateNode.getContent());
-                for (int i = 0; i < this.poolEmittedSentences.size(); i++) {
-                    log.info("%d %f %s", i + 1, poolEmittedSentences.get(i), poolEmittedSentences.get(i).node.getContent());
-                }
-                log.info("simtobeat %f sim %f\n", similarityRankR, candidate.relevance);
-                log.info("oldinfo %b gain %b rank %b\n", oldinfoqualifies, gainqualifies, rankqualifies);
-            }
             if (oldinfoqualifies && gainqualifies && rankqualifies) {
+                // the candidate sentence qualifies and is emitted
                 emit(topicID, candidateNode, candidateNode.getContent());
+                
+                // the sentence is added to the pools of known words and emitted
+                // sentences
                 knownwords.addKownWordCombinations(candidateNodeTerms);
-                Emission e = candidate.getEmission();
-                emittedSentences.add(e);
+                emittedSentences.add(candidate);
                 if (emittedSentences != poolEmittedSentences) {
-                    poolEmittedSentences.add(e);
+                    poolEmittedSentences.add(candidate);
                 }
             }
+            // add the candidate sentence to the relevance model if it is salient
             relevanceVector.addPost(candidateNode);
         }
     }
 
-    public class Candidate extends Emission {
-
+    /**
+     * Represents a candidate sentence that is qualified.
+     */
+    public class Sentence implements Comparable<Sentence> {
+        // although an array list, this should only contain unique words
         public ArrayList<String> candidateNodeTerms;
+        // the cluster snapshot this sentence is a candidate in
         public Cluster<N> cluster;
+        // the node representation of this candidate sentence
+        public N node;
+        // the relevance scored against the most recent relevance model
+        public double relevance;
+        // vector representation of its contents
+        public TermVectorInt vector;
 
-        public Candidate(N node, Cluster<N> cluster, ArrayList<String> terms) {
-            super(node, new TermVectorInt(terms));
+        public Sentence(N node, Cluster<N> cluster, ArrayList<String> terms) {
             this.node = node;
+            this.vector = new TermVectorInt(terms);
             candidateNodeTerms = terms;
             this.cluster = cluster;
         }
 
-        public Emission getEmission() {
-            return new Emission(node, vector);
-        }
-
+        /**
+         * @return true when sufficiently novel, in the original version when the
+         * percentage of 2-word combination in the sentence that co-occur in other
+         * salient sentences in the cluster and are not in emitted sentences exceeds
+         * the threshold minInformationGain. 
+         */
         public boolean gainQualifies() {
+            //The query terms are discounted because of their very frequent appearance.
             HashSet<String> titleminusquery = new HashSet(candidateNodeTerms);
             titleminusquery.removeAll(query.getTerms());
+            
             double gain = knownwords.estimateInformationGain(candidateNodeTerms, cluster, node);
             double gainthreshold = ((titleminusquery.size() * (candidateNodeTerms.size() - 1)) * minInformationGain);
-            //gainthreshold = (((candidateNodeTerms.size() - queryterms.size()) * (candidateNodeTerms.size() - 1)) * minInformationGain);
             if (watch) {
                 log.info("gain %f thresh %f title %d title-q %d\n", gain, gainthreshold, candidateNodeTerms.size(), titleminusquery.size());
             }
             return titleminusquery.size() > 0 && gain >= gainthreshold;
         }
-    }
-
-    public class Emission implements Comparable<Emission> {
-
-        public N node;
-        public double relevance;
-        public TermVectorInt vector;
-
-        public Emission(N node, TermVectorInt vector) {
-            this.node = node;
-            this.vector = vector;
-        }
-
+        
         @Override
-        public int compareTo(Emission o) {
+        public int compareTo(Sentence o) {
             return relevance > o.relevance ? -1 : relevance < o.relevance ? 1 : 0;
         }
     }
 
-    public void sharePool(RetrieveTop3 retriever) {
+    public void sharePool(TopKRetriever retriever) {
         this.poolEmittedSentences = retriever.poolEmittedSentences;
         this.knownwords = retriever.knownwords;
     }
 
-    public void stream(ArrayList<Cluster<N>> clusters) throws IOException, InterruptedException {
-        ArrayList<Candidate> candidates = new ArrayList();
+    public void qualify(ArrayList<Cluster<N>> clusters) throws IOException, InterruptedException {
+        ArrayList<Sentence> candidates = new ArrayList();
         for (Cluster<N> cluster : clusters) {
             N candidateNode = (N) cluster.getNodes().get(cluster.getNodes().size() - 1);
-            cluster = cluster.stripCluster();
+            cluster.stripCluster();
             HashSet<String> candidateNodeTermSet = new HashSet(tokenizer.tokenize(candidateNode.getContent()));
             ArrayList<String> candidateNodeTerms = new ArrayList(candidateNodeTermSet);
 
@@ -234,7 +301,7 @@ public abstract class RetrieveTop3<N extends Node> {
                 if (candidates.size() == 0) {
                     relevanceVector.removeExpired(candidateNode.getCreationTime());
                 }
-                candidates.add(new Candidate(candidateNode, cluster, candidateNodeTerms));
+                candidates.add(new Sentence(candidateNode, cluster, candidateNodeTerms));
             }
         }
         if (candidates.size() > 0) {
@@ -244,7 +311,7 @@ public abstract class RetrieveTop3<N extends Node> {
             rankEmittedSentences(candidates);
             while (candidates.size() > 0) {
                 double similarityRankR = (poolEmittedSentences.size() >= minRankObtained) ? poolEmittedSentences.get(minRankObtained - 1).relevance : 0;
-                Candidate candidate = candidates.remove(0);
+                Sentence candidate = candidates.remove(0);
                 boolean rankqualifies = (poolEmittedSentences.size() < minRankObtained || candidate.relevance >= similarityRankR);
                 boolean gainqualifies = candidate.gainQualifies();
 
@@ -265,10 +332,9 @@ public abstract class RetrieveTop3<N extends Node> {
                 if (oldinfoqualifies && gainqualifies && rankqualifies) {
                     emit(topicID, candidate.node, candidate.node.getContent());
                     knownwords.addKownWordCombinations(candidate.candidateNodeTerms);
-                    Emission e = candidate.getEmission();
-                    emittedSentences.add(e);
+                    emittedSentences.add(candidate);
                     if (poolEmittedSentences != emittedSentences) {
-                        poolEmittedSentences.add(e);
+                        poolEmittedSentences.add(candidate);
                     }
                 }
                 relevanceVector.addPost(candidate.node);
@@ -305,41 +371,14 @@ public abstract class RetrieveTop3<N extends Node> {
     /**
      * re rank all emitted sentences using the relevance vector
      */
-    public void rankEmittedSentences(ArrayList<? extends Emission> list) {
-        for (Emission e : list) {
+    public void rankEmittedSentences(ArrayList<? extends Sentence> list) {
+        for (Sentence e : list) {
             e.relevance = e.vector.cossim(relevanceVector);
         }
         Collections.sort(list);
     }
 
-    /**
-     * @param clusterWritable
-     * @return reconstructed nearest neighbor cluster from stored record
-     */
-    public Cluster<NodeD> createCluster(ClusterWritable clusterWritable) {
-        Stream<NodeD> s = new Stream();
-        for (NodeWritable r : clusterWritable.nodes) {
-            HashSet<String> title = new HashSet(tokenizer.tokenize(r.content));
-            NodeD u = new NodeD(r.sentenceID, r.domain, r.content, title, r.creationtime, r.getUUID(), r.sentenceNumber);
-            s.nodes.put(u.getID(), u);
-        }
-        Cluster<NodeD> c = s.createCluster(clusterWritable.clusterid);
-        for (NodeWritable r : clusterWritable.nodes) {
-            Node url = s.nodes.get(r.sentenceID);
-            ArrayList<Long> nn = getNN(r.nnid);
-            ArrayList<Double> score = getScores(r.nnscore);
-            for (int i = 0; i < nn.size(); i++) {
-                Node u = s.nodes.get(nn.get(i));
-                Edge e = new Edge(u, score.get(i));
-                url.add(e);
-            }
-            url.setCluster(c);
-        }
-        c.setBase(Cluster.getBase(c.getNodes()));
-        return c;
-    }
-
-    public static ArrayList<Long> getNN(String nn) {
+    public static ArrayList<Long> getNearestNeigborIds(String nn) {
         ArrayList<Long> result = new ArrayList();
         for (String n : nn.split(",")) {
             result.add(Long.parseLong(n));
@@ -347,7 +386,7 @@ public abstract class RetrieveTop3<N extends Node> {
         return result;
     }
 
-    public static ArrayList<Double> getScores(String nn) {
+    public static ArrayList<Double> getNearestNeighborScores(String nn) {
         ArrayList<Double> result = new ArrayList();
         for (String n : nn.split(",")) {
             result.add(Double.parseDouble(n));
@@ -355,28 +394,14 @@ public abstract class RetrieveTop3<N extends Node> {
         return result;
     }
 
-    public static HashMap<Integer, TopicWritable> getTopics(String topicfile) {
-        Datafile df = new Datafile(topicfile);
-        TopicFile tf = new TopicFile(df);
-        return tf.getMap();
-    }
-
-    public ArrayMap3<Long, Long, HashSet<String>> getRelevanceEntries() {
-        ArrayMap3<Long, Long, HashSet<String>> entries = new ArrayMap3();
-        for (Map.Entry<Long, RelevanceVector.doc> entry : relevanceVector.sentenceAddedRelevanceModel) {
-            entries.add(entry.getKey(), entry.getValue().sentenceid, entry.getValue().content);
-        }
-        return entries;
-    }
-
     protected class RelevanceVector extends TermVectorInt {
 
         class doc {
 
             long sentenceid;
-            HashSet<String> content;
+            Collection<String> content;
 
-            doc(long id, HashSet<String> content) {
+            doc(long id, Collection<String> content) {
                 sentenceid = id;
                 this.content = content;
             }
@@ -401,8 +426,8 @@ public abstract class RetrieveTop3<N extends Node> {
             sentenceAddedRelevanceModel.addAll(other.sentenceAddedRelevanceModel);
         }
 
-        public void add(Cluster<NodeD> c) {
-            for (NodeD base : c.getBase()) {
+        public void add(Cluster<NodeSentence> c) {
+            for (NodeSentence base : c.getCore()) {
                 if (!sentenceAddedToRelevanceModel.contains(base.getID())) {
                     sentenceAddedToRelevanceModel.add(base.getID());
                     this.add(base.getTerms());
@@ -412,7 +437,7 @@ public abstract class RetrieveTop3<N extends Node> {
         }
 
         public void addPre(Cluster<N> c, N candidate) {
-            for (N base : c.getBase()) {
+            for (N base : c.getCore()) {
                 if (base != candidate && !sentenceAddedToRelevanceModel.contains(base.getID())) {
                     sentenceAddedToRelevanceModel.add(base.getID());
                     this.add(base.getTerms());
@@ -429,7 +454,7 @@ public abstract class RetrieveTop3<N extends Node> {
             }
         }
 
-        public void add(long timestamp, long id, HashSet<String> terms) {
+        public void add(long timestamp, long id, Collection<String> terms) {
             this.add(terms);
             this.sentenceAddedRelevanceModel.add(timestamp, new doc(id, terms));
             this.sentenceAddedToRelevanceModel.add(id);
@@ -483,13 +508,13 @@ public abstract class RetrieveTop3<N extends Node> {
         public abstract boolean getOldInfo(ArrayList<String> terms, Query query, int e);
     }
 
-    protected class KnownWordsBigram extends KnownWords<N> {
+    protected class KnownWordsCombinations extends KnownWords<N> {
 
         protected HashMapSet<String, String> knownwords = new HashMapSet();
 
         @Override
         public void add(KnownWords other) {
-            knownwords.addAll(((KnownWordsBigram) other).knownwords);
+            knownwords.addAll(((KnownWordsCombinations) other).knownwords);
         }
 
         @Override

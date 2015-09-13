@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>NewsClustering</artifactId>
-    <groupId>NewsClustering</groupId>
+    <artifactId>k3nn</artifactId>
+    <groupId>io.github.k3nn</groupId>
     <version>0.01a-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>NewsClustering</name>
+    <name>K3NN Clustering</name>
   
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -67,16 +67,6 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-client</artifactId>
-            <version>${hadoop.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.thrift</groupId>
-            <artifactId>libthrift</artifactId>
-            <version>0.9.1</version>
-        </dependency>
-        <dependency>
             <groupId>io.github.htools</groupId>
             <artifactId>HTools</artifactId>
             <version>0.26-SNAPSHOT</version>
@@ -88,72 +78,17 @@
             </exclusions>
             <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>io.github.repir</groupId>
-            <artifactId>RepIR</artifactId>
-            <version>0.26-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.tukaani</groupId>
-            <artifactId>xz</artifactId>
-            <version>1.5</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.trove4j</groupId>
-            <artifactId>trove4j</artifactId>
-            <version>3.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.xerial.snappy</groupId>
-            <artifactId>snappy-java</artifactId>
-            <version>1.1.1.6</version>
-        </dependency> 
-        <dependency>
-            <groupId>com.rometools</groupId>
-            <artifactId>rome</artifactId>
-            <version>1.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jdom</groupId>
-            <artifactId>jdom</artifactId>
-            <version>2.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
-        </dependency>
-        <dependency>
-            <groupId>com.syncthemall</groupId>
-            <artifactId>boilerpipe</artifactId>
-            <version>1.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>nekohtml</groupId>
-            <artifactId>nekohtml</artifactId>
-            <version>1.9.6.2</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <version>3.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.rometools</groupId>
-            <artifactId>rome-modules</artifactId>
-            <version>1.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>cc.mallet</groupId>
-            <artifactId>mallet</artifactId>
-            <version>2.0.7-RC2</version>
-        </dependency>
     </dependencies>
+    <description>Implementation of 3NN K-Nearest Neighbor clustering 
+as described in [1], to identify salient information as 
+the 2-degenerate cores from a clustering graph containing 
+information nodes that are linked to their 3-nearest neighbors, 
+and qualifying sentences that outrank previously selected 
+sentences using a relevance model of salient information seen 
+over a recent time interval.
+
+[1] JBP Vuurens, AP de Vries, R Blanco, P Mika, 
+"Online News Tracking for Ad-Hoc Information Needs",
+in ICTIR 2015.
+</description>
 </project>
