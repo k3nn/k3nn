@@ -1,6 +1,6 @@
 package io.github.k3nn.impl;
 
-import io.github.k3nn.IINodes;
+import io.github.k3nn.NodeStoreII;
 import io.github.k3nn.Score;
 import io.github.htools.collection.ArrayMapDouble;
 import io.github.htools.collection.HashMapDouble;
@@ -16,7 +16,7 @@ import java.util.Map;
  *
  * @author jeroen
  */
-public class NodeStoreIIIDF<N extends NodeMagnitude> extends IINodes<N> {
+public class NodeStoreIIIDF<N extends NodeMagnitude> extends NodeStoreII<N> {
 
     public static final Log log = new Log(NodeStoreIIIDF.class);
     // IDF * IDF for terms in Wikipedia

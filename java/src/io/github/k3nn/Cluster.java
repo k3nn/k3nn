@@ -3,6 +3,7 @@ package io.github.k3nn;
 import io.github.htools.collection.HashMapInt;
 import io.github.htools.fcollection.FHashSet;
 import io.github.htools.lib.Log;
+import io.github.htools.lib.MathTools;
 import static io.github.htools.lib.PrintTools.sprintf;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,15 +15,26 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
+ * A Cluster is a set of Nodes that is grouped together, typically by a
+ * ClusteringGraph using the 3NN heuristic. The core nodes of the cluster is
+ * typically a subset of the cluster member nodes that form a 2-degenerate core
+ * of a 3 nearest neighbor graph.
  *
  * @author jeroen
  */
 public class Cluster<N extends Node> {
 
     public static final Log log = new Log(Cluster.class);
+
     // maximum number of nearest neighbors, here fixed to 3
     public static final int K = 3;
+
+    // for assignment of non-core nodes, typically majority votes is used, i.e. 
+    // assigning nodes to the same number of nodes as their majority of NNs, or
+    // not assigning if no majority exists. BREAKTIE gives the number to exceed 
+    // to obtain a majority.
     public static final int BREAKTIE = K / 2;
+
     // internal cluster ID
     final int id;
     private ClusteringGraph clusteringGraph;
@@ -32,25 +44,17 @@ public class Cluster<N extends Node> {
     // the 2-degenerate core nodes that form the cluster
     private FHashSet<N> core = new FHashSet();
     // for debugging purposes
-    private static HashSet<Integer> watchlist = new HashSet(Arrays.asList(
-            6915, 6907
-    ));
+    private static HashSet<Integer> watchlist = new HashSet(Arrays.asList());
+    // for debugging purposes, set to true to trace information
     public final boolean watch;
 
-    public Cluster(ClusteringGraph stream, int id) {
-        this.clusteringGraph = stream;
+    public Cluster(ClusteringGraph clusteringGraph, int id) {
+        this.clusteringGraph = clusteringGraph;
         this.id = id;
         watch = watch(this);
     }
 
-    /**
-     * Only for debug purposes
-     */
-    public static Cluster createCluster() {
-        return new Cluster(null, 0);
-    }
-
-    // cluster used by ClusteringGraph to construct a new cluster around a
+    // used by ClusteringGraph to construct a new cluster around a
     // 2-degenerate core
     public static <N extends Node> Cluster createCoreCluster(ClusteringGraph<N> clusteringGraph, int id, Collection<N> core) {
         Cluster<N> cluster = new Cluster(clusteringGraph, id);
@@ -59,13 +63,21 @@ public class Cluster<N extends Node> {
             coreNode.setCluster(cluster);
         }
 
-        if (cluster.watch) {
-            log.info("create %d", cluster.getID());
-            for (Node coreNode : cluster.getCore()) {
-                log.info("core %d %s %s", coreNode.getID(), coreNode.getNearestNeighborIds(), coreNode.getNearestNeighborScores());
-            }
-        }
+//        if (cluster.watch) {
+//            log.info("create %d", cluster.getID());
+//            for (Node coreNode : cluster.getCore()) {
+//                log.info("core %d %s %s", coreNode.getID(), coreNode.getNearestNeighborIds(), coreNode.getNearestNeighborScores());
+//            }
+//        }
         return cluster;
+    }
+
+    /**
+     * @return a shallow copy of the current cluster with the same core nodes.
+     * experimental, don't use unless you known what you are doing.
+     */
+    public Cluster<N> cloneCore() {
+        return createCoreCluster(clusteringGraph, id, getCore());
     }
 
     private static boolean watch(Cluster c) {
@@ -77,60 +89,16 @@ public class Cluster<N extends Node> {
      *
      * @param core
      */
-    public void setCore(Collection<? extends Node> core) {
+    void setCore(Collection<? extends Node> core) {
         if (watch(this)) {
-            log.info("setBase %d %s", id, core);
+            log.info("setCore %d %s", id, core);
         }
         if (core == null) {
             this.core = null;
         } else if (core.size() < Cluster.K) {
-            log.fatal("cluster %d base size %d", getID(), core.size());
+            log.fatal("cluster %d invalid core too small %d", getID(), core.size());
         } else {
             this.core = new FHashSet(core);
-        }
-    }
-
-    /**
-     * Sets the member nodes.
-     *
-     * @param nodes
-     */
-    public void setNodes(Collection<? extends Node> nodes) {
-        //log.info("setNodes %d %d", id, nodes.size());
-        this.nodes = new ArrayList(nodes);
-    }
-
-    /**
-     * If there is a 2-degenerate core in the members nodes, it finds it and
-     * sets this as the core. If no core is found, the cluster is disbanded, all
-     * nodes are set to an unclustered status and the cluster is removed from
-     * the ClusteringGraph.
-     *
-     * @return true if 2-degenerate core was found
-     */
-    public boolean find2DegenerateCore() {
-        FHashSet<N> core = get2DegenerateCore(nodes);
-        //if (watch(this)) {
-        //log.info("find2DegenerateCore %s", core);
-        //}
-        if (core.isEmpty()) {
-            // no 2-degenerate core was found -> disband
-            for (int i = nodes.size() - 1; i >= 0; i--) {
-                nodes.get(i).setCluster(null);
-            }
-            nodes = null;
-            this.core = null;
-            clusteringGraph.remove(this);
-            if (watch(this)) {
-                log.info("find2DegenerateCore remove cluster %s", core);
-            }
-            return false;
-        } else {
-            if (!core.equals(this.core)) {
-                //log.info("find2DegenerateCore news core %s", core);
-                setCore(core);
-            }
-            return true;
         }
     }
 
@@ -175,7 +143,14 @@ public class Cluster<N extends Node> {
         return id;
     }
 
-    public void addNode(N node) {
+    /**
+     * Adds the node as a cluster member (not a core node). The node's cluster
+     * assignment is not updated, but this method is commonly only called by the
+     * node which should update its own reference.
+     *
+     * @param node
+     */
+    void addNode(N node) {
         if (watch(this)) {
             log.info("Add Url %d to cluster %d", node.getID(), getID());
         }
@@ -252,9 +227,10 @@ public class Cluster<N extends Node> {
 
     /**
      * @param nodes
-     * @return the 2-degenerate core of linked nearest neighbor nodes within the
-     * set of nodes, not looking outside the given set, and returning an empty
-     * list when no 2-degenerate core exists.
+     * @return the 2-degenerate core of linked nearest neighbor nodes with at
+     * least one member inside the set of nodes, and returning an empty list
+     * when no 2-degenerate core exists. When multiple cores exists, only one is
+     * returned.
      */
     public static <N extends Node> FHashSet<N> get2DegenerateCore(Collection<N> nodes) {
         for (N node : nodes) {
@@ -277,20 +253,26 @@ public class Cluster<N extends Node> {
         return emptylist;
     }
 
-    public static <N extends Node> FHashSet<N> getCoreFast(Collection<N> nodes) {
-        for (N u : nodes) {
-            int count = Cluster.BREAKTIE;
-            for (int e = u.edges - 1; e >= count; e--) {
-                Edge<N> edge = u.getNearestNeighbor(e);
-                N to = edge.getNode();
+    /**
+     * @param nodes
+     * @return the 2-degenerate core of linked nearest neighbor nodes within the
+     * set of nodes, not looking outside the given set, and returning an empty
+     * list when no 2-degenerate core exists. This method should be used when
+     * reconstructing serialized clusters.
+     */
+    public static FHashSet<? extends Node> get2DegenerateCoreWithin(Collection<? extends Node> nodes) {
+        for (Node node : nodes) {
+            int count = 0;
+            for (int e = 0; e < node.edges; e++) {
+                Edge<Node> edge = node.getNearestNeighbor(e);
+                Node to = edge.getNode();
                 if (to != null) {
-                    if (to.getID() > u.getID() && to.linkedTo(u)) {
-                        if (count-- == 0) {
-                            FHashSet<N> base1 = (FHashSet<N>) u.get2DegenerateCore();
+                    if (to.getID() > node.getID() && nodes.contains(to) && to.linkedTo(node)) {
+                        if (++count > Cluster.BREAKTIE) {
+                            FHashSet<Node> base1 = node.get2DegenerateCoreWithin(nodes);
                             if (base1.size() > 0) {
                                 return base1;
                             }
-                            break;
                         }
                     }
                 }
@@ -306,19 +288,20 @@ public class Cluster<N extends Node> {
         return nodes.size();
     }
 
+    @Override
     public int hashCode() {
-        return id;
+        return MathTools.hashCode(id);
     }
 
+    @Override
     public boolean equals(Object o) {
+        // of every cluster there should be only a single instance
         return this == o;
     }
 
     /**
-     * remove nodes that are not linked transitively linked to from the cluster
-     * base
-     *
-     * @param cluster
+     * removes all cluster members to which there is no directed path from a 
+     * core node.
      */
     public void stripCluster() {
         FHashSet<N> urls = baseLinkedCluster();
@@ -330,6 +313,10 @@ public class Cluster<N extends Node> {
         }
     }
 
+    /**
+     * @return a set of nodes that are either core nodes or nodes to which a
+     * directed path from a core node exists.
+     */
     public FHashSet<N> baseLinkedCluster() {
         FHashSet<N> urls = new FHashSet(nodes.size());
         FHashSet<N> newurls = getCore();
@@ -441,6 +428,9 @@ public class Cluster<N extends Node> {
         sb.append("\n");
     }
 
+    /**
+     * A Comparator to sort clusters on id.
+     */
     public static class IdComparator implements Comparator<Node> {
 
         private static IdComparator instance;

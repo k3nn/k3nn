@@ -25,12 +25,12 @@ public class ClusteringGraphPurgable<N extends NodeSentence> extends ClusteringG
      * file if the sentence is clustered and is a candidate sentence.
      */
     @Override
-    public void addSentence(N sentence, HashSet<String> terms, boolean isCandidate) {
-        super.addSentence(sentence, terms, isCandidate);
+    public void addNode(N sentence, HashSet<String> terms, boolean isCandidate) {
+        super.addNode(sentence, terms, isCandidate);
         checkPurge(sentence.getCreationTime());
     }
 
-    public void checkPurge(long creationtime) {
+    protected void checkPurge(long creationtime) {
         if (creationtime > threshold || count++ > 100000) {
             if (threshold == 0) {
                 threshold = ((creationtime / secondsPerDay) + 5) * secondsPerDay;
@@ -40,11 +40,5 @@ public class ClusteringGraphPurgable<N extends NodeSentence> extends ClusteringG
             }
             count = 0;
         }
-    }
-
-    /**
-     * write clustered candidate sentence to the clusterFile
-     */
-    public void clusteredCandidateSentence(NodeSentence candidateSentence) {
     }
 }

@@ -21,7 +21,7 @@ public class NodeSentence extends NodeTerms {
     }
     
     /**
-     * @return collection document id, consisting of creation time + uuid;
+     * @return collection document id, consisting of creation time + TREC UUID;
      */
     public String getDocumentID() {
         return this.getCreationTime() + "-" + uuid.toString().replace("-", "");

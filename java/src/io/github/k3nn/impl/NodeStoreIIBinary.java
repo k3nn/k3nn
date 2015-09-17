@@ -1,6 +1,6 @@
 package io.github.k3nn.impl;
 
-import io.github.k3nn.IINodes;
+import io.github.k3nn.NodeStoreII;
 import io.github.k3nn.Score;
 import io.github.htools.collection.ArrayMapDouble;
 import io.github.htools.fcollection.FHashMapInt;
@@ -14,7 +14,7 @@ import java.util.Collection;
  *
  * @author jeroen
  */
-public class NodeStoreIIBinary<N extends NodeM> extends IINodes<N> {
+public class NodeStoreIIBinary<N extends NodeCount> extends NodeStoreII<N> {
 
     public static final Log log = new Log(NodeStoreIIBinary.class);
 
@@ -39,7 +39,7 @@ public class NodeStoreIIBinary<N extends NodeM> extends IINodes<N> {
         for (Object2IntMap.Entry<N> entry : node2TermCount.object2IntEntrySet()) {
             N node = entry.getKey();
             int termCount = entry.getIntValue();
-            double score = score(node, newNode, termCount, sqrtSizeA);
+            double score = score(newNode, node, termCount, sqrtSizeA);
             if (score > 0) {
                 result.add(score, entry.getKey());
             }
@@ -48,7 +48,7 @@ public class NodeStoreIIBinary<N extends NodeM> extends IINodes<N> {
         return result;
     }
 
-    public double score(NodeM a, NodeM b, int termCount, double sqrtSizeA) {
+    public double score(NodeCount a, NodeCount b, int termCount, double sqrtSizeA) {
         if (a.domain == b.domain) {
             return 0;
         }

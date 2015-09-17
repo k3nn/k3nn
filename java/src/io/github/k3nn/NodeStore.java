@@ -5,7 +5,11 @@ import io.github.htools.fcollection.FHashMapLongObject;
 import java.util.Collection;
 
 /**
- * An inverted index to retrieve nodes that contain a feature.
+ * Stores the nodes for a clustering graph to allow retrieving nodes based on 
+ * ID and a list of (potential) nearest neighbor nodes for a given node. Implementations
+ * should use some strategy to compile such a list, e.g. an inverted index or 
+ * locality sensitive hashing, and contains a scoring function to assign scores
+ * to the retrieved list.
  * @author jeroen
  * @param <N>
  */

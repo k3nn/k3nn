@@ -2,12 +2,11 @@ package io.github.k3nn.impl;
 
 import io.github.k3nn.ClusteringGraph;
 import io.github.htools.lib.Log;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
 
 /**
- * Node that memorizes the terms, collection uuid and sentence number.
+ * Extension to NodeSentence that caches the magnitude of its TF-IDF vector.
  * @author jeroen
  */
 public class NodeMagnitude extends NodeSentence {
@@ -17,13 +16,6 @@ public class NodeMagnitude extends NodeSentence {
 
     public NodeMagnitude(ClusteringGraph<NodeMagnitude> stream, long id, int domain, String title, HashSet<String> features, long creationtime, UUID uuid, int sentence) {
         super(id, domain, title, features, creationtime, uuid, sentence);
-        magnitude = ((NodeStoreIIIDF)stream.iinodes).getMagnitude(this);
-    }
-    
-    /**
-     * @return collection document id, consisting of creation time + uuid;
-     */
-    public String getDocumentID() {
-        return this.getCreationTime() + "-" + uuid.toString().replace("-", "");
+        magnitude = ((NodeStoreIIIDF)stream.nodeStore).getMagnitude(this);
     }
 }

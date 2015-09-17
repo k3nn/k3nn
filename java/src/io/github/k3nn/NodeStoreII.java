@@ -13,9 +13,9 @@ import java.util.Iterator;
  *
  * @author jeroen
  */
-public abstract class IINodes<N extends Node> extends FHashMapList<String, N> implements NodeStore<N> {
+public abstract class NodeStoreII<N extends Node> extends FHashMapList<String, N> implements NodeStore<N> {
 
-    public static final Log log = new Log(IINodes.class);
+    public static final Log log = new Log(NodeStoreII.class);
     protected FHashMapLongObject<N> nodes = new FHashMapLongObject();
 
     /**

@@ -8,7 +8,7 @@ import java.util.Collection;
  * Extension of Node that also holds a String of its contents.
  * @author jeroen
  */
-public class NodeTitle extends NodeM {
+public class NodeTitle extends NodeCount {
 
     static Log log = new Log(NodeTitle.class);
     String content; // content the node represents
@@ -18,12 +18,9 @@ public class NodeTitle extends NodeM {
         this.content = title;
     }
 
+    @Override
     public String getContent() {
         return content;
-    }
-    
-    public void setContent(String title) {
-        this.content = title;
     }
     
     @Override

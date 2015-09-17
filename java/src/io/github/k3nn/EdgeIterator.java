@@ -2,8 +2,9 @@ package io.github.k3nn;
 
 import io.github.htools.lib.Log;
 import java.util.Iterator;
+
 /**
- *
+ * Iterates over a node's nearest neighbor edges. 
  * @author jeroen
  */
 public class EdgeIterator<N extends Node> implements Iterator<Edge<N>>, Iterable<Edge<N>> {

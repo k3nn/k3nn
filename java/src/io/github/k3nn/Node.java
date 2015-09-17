@@ -6,6 +6,7 @@ import io.github.htools.lib.MathTools;
 import static io.github.htools.lib.PrintTools.sprintf;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.PriorityQueue;
@@ -20,7 +21,7 @@ import java.util.Set;
  * only internal Node ID's, and information about assigned nearest neighbors and
  * cluster. Note that this class cannot be clustered since number of features is
  * missing. Other subclasses of Node have attributes to report more elaborately,
- * e.g. NodeM holds the number of terms to allow comparing similarity, NodeT
+ * e.g. NodeCount holds the number of terms to allow comparing similarity, NodeT
  * contains also the title.
  *
  * @author jeroen
@@ -29,16 +30,25 @@ public abstract class Node implements Comparable<Node> {
 
     public static Log log = new Log(Node.class);
     public static HashSet<Long> watchlist = new HashSet(
-            Arrays.asList(
-                   
-            )); // for debugging
-    public final boolean watch; // used for debugging
+            Arrays.asList()); // for debugging
+    public boolean watch; // used for debugging
+    // unique node ID
     private long id;
+    // edges to this nodes nearest neigbors
     protected Edge[] edge = new Edge[Cluster.K]; // links to nearest neighbors
+    // the number of currently assigned nearest neighbors
     protected int edges = 0; // number of edges used
-    FHashSet<Node> backlinks; // nodes that have this node as nearest neighbor
+    // a set of nodes that link to this node as nearest neighbor, or NULL when
+    // there are no nodes that have this node as nearest neighbor.
+    protected FHashSet<Node> backlinks; // nodes that have this node as nearest neighbor
+    // domain id to determine whether two nodes are from the same domain which
+    // by default sets their similarity to 0 to force edges between nodes from
+    // different domains
     public int domain = -1;
+    // creation time of the information, e.g. publication time of the news article
+    // from which the information was extracted.
     protected long creationtime;
+    // assigned cluster or NULL if not clustered.
     private Cluster cluster = null;
 
     public Node(long id) {
@@ -56,15 +66,11 @@ public abstract class Node implements Comparable<Node> {
         return watchlist.contains(node.getID());
     }
 
+    /**
+     * @return unique node id, e.g. id of the sentence in the corpus
+     */
     public long getID() {
         return id;
-    }
-
-    protected void clear() {
-        edge = new Edge[Cluster.K];
-        backlinks = null;
-        cluster = null;
-        edges = 0;
     }
 
     /**
@@ -86,13 +92,18 @@ public abstract class Node implements Comparable<Node> {
         backlinks.remove(u);
     }
 
+    /**
+     * @return a set of nodes that have this node as one of its K nearest
+     * neighbors.
+     */
     public FHashSet<Node> getBacklinks() {
         return backlinks;
     }
 
     /**
-     * add an Edge if the score is higher than the weakest NN, the NNs remain
-     * sorted
+     * add an Edge if the score is higher than the weakest NN, the array of
+     * nearest neighbor edges always remains sorted, most similar neighbor
+     * first.
      *
      * @param e
      */
@@ -101,9 +112,6 @@ public abstract class Node implements Comparable<Node> {
             edge[edges++] = e;
             if (e.getNode() != null) {
                 ((Node) e.getNode()).addBackLink(this);
-            }
-            if (watch) {
-                log.info("add Edge %d 0 %d %f", getID(), e.getNode() == null ? -1 : e.getNode().getID(), e.getScore());
             }
         } else if (edge[edges - 1].getScore() <= e.getScore()) {
             if (edges == Cluster.K && edge[Cluster.K - 1].getNode() != null) {
@@ -118,9 +126,6 @@ public abstract class Node implements Comparable<Node> {
                     if (e.getNode() != null) {
                         ((Node) e.getNode()).addBackLink(this);
                     }
-                    if (watch) {
-                        log.info("add Edge %d %d %d %f", getID(), pos, e.getNode() == null ? -1 : e.getNode().getID(), e.getScore());
-                    }
                     if (edges < Cluster.K) {
                         edges++;
                     }
@@ -132,22 +137,28 @@ public abstract class Node implements Comparable<Node> {
             if (e.getNode() != null) {
                 ((Node) e.getNode()).addBackLink(this);
             }
-            if (watch) {
-                log.info("add Edge %d %d %d %f", getID(), edges - 1, e.getNode() == null ? -1 : e.getNode().getID(), e.getScore());
-            }
         }
     }
 
+    /**
+     * @return an int that corresponds to the news domain the content is from, e.g.
+     * nytimes.com or cnn.com, which is used to assign zero scores to nodes from
+     * the same domain since these cannot be each others nearest neighbors.
+     */
     public int getDomain() {
         return domain;
     }
 
+    /**
+     * @return the ID of the cluster this node is assigned to, or -1 if unclustered.
+     */
     public int getClusterID() {
         return cluster == null ? -1 : cluster.id;
     }
 
     /**
-     * @return the content this node contains
+     * @return the content this node contains, the NodeType used has to support
+     * this for this to work.
      */
     public String getContent() {
         throw new UnsupportedOperationException();
@@ -160,6 +171,10 @@ public abstract class Node implements Comparable<Node> {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @return If the majority of K nearest neighbors is assigned to the same cluster
+     * it returns that cluster, null otherwise.
+     */
     public Cluster majority() {
         if (countNearestNeighbors() == Cluster.K) {
             if (edge[0].node != null && edge[0].node.getCluster() != null) {
@@ -168,7 +183,8 @@ public abstract class Node implements Comparable<Node> {
                         || (edge[2].node != null && edge[2].node.cluster == c)) {
                     return c;
                 }
-            } else if (edge[1].node != null && edge[2].node != null
+            }
+            if (edge[1].node != null && edge[2].node != null
                     && edge[1].node.getCluster() == edge[2].node.getCluster()) {
                 return edge[1].node.getCluster();
             }
@@ -216,17 +232,10 @@ public abstract class Node implements Comparable<Node> {
     public Node getWeakestNearestNeighbor() {
         return edges == 0 ? null : edge[edges - 1].node;
     }
-    
-    public int countNonNullNeighbors() {
-        int count = 0;
-        for (int i = 0; i < edges; i++)
-            if (edge[i].node != null)
-                count++;
-        return count;
-    }
-    
+
     /**
-     * @return an Iterator/Iterable over the edges to this nodes nearest neighbors
+     * @return an Iterator/Iterable over the edges to this nodes nearest
+     * neighbors
      */
     public EdgeIterator<Node> iterator() {
         return new EdgeIterator(this);
@@ -258,24 +267,16 @@ public abstract class Node implements Comparable<Node> {
      * Assign the node to cluster c. When the node was previously assigned to a
      * different cluster it is removed as a member for this cluster.
      *
-     * @param c
+     * @param newCluster
      */
-    public void setCluster(Cluster c) {
-        if (cluster != c) {
-            if ((cluster != null && cluster.watch) || watch || (c != null && c.watch)) {
-                log.info("setClusterPre %s newcluster %s", this.toClusterString(), c == null ? -1 : c.getID());
-            }
+    public void setCluster(Cluster newCluster) {
+        if (this.cluster != newCluster) {
             if (this.cluster != null) {
                 cluster.remove(this);
             }
-            this.cluster = c;
-            if (c != null) {
-                if ((c != null && c.watch) || watch) {
-                    log.info("setClusterPost url %s", this.toClusterString());
-                }
-                c.addNode(this);
-            } else if (watch) {
-                log.info("unCluster %s", this.toClusterString());
+            this.cluster = newCluster;
+            if (newCluster != null) {
+                newCluster.addNode(this);
             }
         }
     }
@@ -316,6 +317,10 @@ public abstract class Node implements Comparable<Node> {
         return (countNearestNeighbors() > 0) ? sb.deleteCharAt(0).toString() : "";
     }
 
+    /**
+     * @return the publication time of the document from which the node
+     * originated
+     */
     public long getCreationTime() {
         return creationtime;
     }
@@ -380,7 +385,11 @@ public abstract class Node implements Comparable<Node> {
         }
     }
 
-    public boolean possibleCoreNode() {
+    /**
+     * @return true when the majority of the node's nearest neighbors points
+     * back to this node.
+     */
+    public boolean hasTwoBidirectedEdges() {
         if (backlinks != null) {
             int count = 0;
             for (int i = 0; i < edges; i++) {
@@ -401,6 +410,19 @@ public abstract class Node implements Comparable<Node> {
      */
     public FHashSet<Node> get2DegenerateCore() {
         ArrayList<Node> biconnected = getNextBidirectionalEdges(getCluster());
+        return get2DegenerateCore(biconnected);
+    }
+
+    /**
+     * @return A 2-degenerate core this node is a member of, within the set of
+     * given nodes, or an empty set if no such core exists.
+     */
+    public FHashSet<Node> get2DegenerateCoreWithin(Collection<? extends Node> nodes) {
+        ArrayList<Node> biconnected = getNextBidirectionalEdgesWithin(nodes);
+        return get2DegenerateCore(biconnected);
+    }
+
+    private FHashSet<Node> get2DegenerateCore(ArrayList<Node> biconnected) {
         PriorityQueue<Vertex> queue = new PriorityQueue();
         HashMap<Long, Vertex> visited = new HashMap();
         for (int i = 0; i < biconnected.size(); i++) {
@@ -446,22 +468,22 @@ public abstract class Node implements Comparable<Node> {
         return solution;
     }
 
-    public boolean possibleCoreNode2() {
-        int count = 0;
-        for (int e = 0; e < edges; e++) {
-            Node nn = edge[e].node;
-            if (nn != null && nn.possibleCoreNode()) {
-                count++;
-            }
-        }
-        return count > Cluster.BREAKTIE;
-    }
-
     private ArrayList<Node> getNextBidirectionalEdges(Cluster cluster) {
         ArrayList<Node> result = new ArrayList();
         for (int e = 0; e < edges; e++) {
             Node dest = ((Node) edge[e].getNode());
             if (dest != null && dest.linkedTo(this) && (dest.getCluster() == cluster || !dest.isClusterCoreNode())) {
+                result.add(dest);
+            }
+        }
+        return result;
+    }
+
+    private ArrayList<Node> getNextBidirectionalEdgesWithin(Collection<? extends Node> nodes) {
+        ArrayList<Node> result = new ArrayList();
+        for (int e = 0; e < edges; e++) {
+            Node dest = ((Node) edge[e].getNode());
+            if (dest != null && nodes.contains(dest) && dest.linkedTo(this)) {
                 result.add(dest);
             }
         }
@@ -476,7 +498,9 @@ public abstract class Node implements Comparable<Node> {
 
     public String toClusterString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(sprintf("%d [%d]: ", id, cluster == null ? -1 : cluster.getID()));
+        sb.append(sprintf("%d [%d%s]: ", id,
+                cluster == null ? -1 : cluster.getID(),
+                isClusterCoreNode() ? "c" : ""));
         for (Edge e : new EdgeIterator<Node>(this)) {
             if (e.getNode() == null) {
                 sb.append(sprintf("x [-1] "));
@@ -492,15 +516,6 @@ public abstract class Node implements Comparable<Node> {
         sb.append(sprintf("Url [%d] %d", edges, id));
         for (int i = 0; i < edges; i++) {
             sb.append("\n").append(edge[i].toString());
-        }
-        return sb.toString();
-    }
-
-    public String toStringEdges2() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(sprintf("Url %d [%d]:", id, getClusterID()));
-        for (int i = 0; i < edges; i++) {
-            sb.append(sprintf(" %d [%d]", edge[i].node.getID(), edge[i].getNode().getClusterID()));
         }
         return sb.toString();
     }
