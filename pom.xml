@@ -126,7 +126,7 @@
                 <configuration>
                     <target>  
                         <echo message="${project.build.directory}/${project.build.finalName}.jar" />
-                        <scp todir="${kbadir}" 
+                        <scp todir="${ntdir}"
                              keyfile="${keyfile}"
                              trust="true" failonerror="false"
                              file="${project.build.directory}/${project.build.finalName}.jar">
@@ -163,7 +163,7 @@
         <dependency>
             <groupId>io.github.htools</groupId>
             <artifactId>htools</artifactId>
-            <version>0.27-SNAPSHOT</version>
+            <version>0.27</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.hadoop</groupId>

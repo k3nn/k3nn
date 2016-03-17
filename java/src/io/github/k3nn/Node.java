@@ -141,16 +141,17 @@ public abstract class Node implements Comparable<Node> {
     }
 
     /**
-     * @return an int that corresponds to the news domain the content is from, e.g.
-     * nytimes.com or cnn.com, which is used to assign zero scores to nodes from
-     * the same domain since these cannot be each others nearest neighbors.
+     * @return an int that corresponds to the news domain the content is from,
+     * e.g. nytimes.com or cnn.com, which is used to assign zero scores to nodes
+     * from the same domain since these cannot be each others nearest neighbors.
      */
     public int getDomain() {
         return domain;
     }
 
     /**
-     * @return the ID of the cluster this node is assigned to, or -1 if unclustered.
+     * @return the ID of the cluster this node is assigned to, or -1 if
+     * unclustered.
      */
     public int getClusterID() {
         return cluster == null ? -1 : cluster.id;
@@ -172,8 +173,8 @@ public abstract class Node implements Comparable<Node> {
     }
 
     /**
-     * @return If the majority of K nearest neighbors is assigned to the same cluster
-     * it returns that cluster, null otherwise.
+     * @return If the majority of K nearest neighbors is assigned to the same
+     * cluster it returns that cluster, null otherwise.
      */
     public Cluster majority() {
         if (countNearestNeighbors() == Cluster.K) {
@@ -414,6 +415,16 @@ public abstract class Node implements Comparable<Node> {
     }
 
     /**
+     *
+     * @return A 2-degenerate core this node is a member of, or an empty set if
+     * no such core exists.
+     */
+    public void get2DegenerateCore(FHashSet<? extends Node> result) {
+        ArrayList<Node> biconnected = getNextBidirectionalEdges(getCluster());
+        get2DegenerateCore(result, biconnected);
+    }
+
+    /**
      * @return A 2-degenerate core this node is a member of, within the set of
      * given nodes, or an empty set if no such core exists.
      */
@@ -423,6 +434,12 @@ public abstract class Node implements Comparable<Node> {
     }
 
     private FHashSet<Node> get2DegenerateCore(ArrayList<Node> biconnected) {
+        FHashSet<Node> solution = new FHashSet();
+        get2DegenerateCore(solution, biconnected);
+        return solution;
+    }
+
+    private void get2DegenerateCore(FHashSet solution, ArrayList<Node> biconnected) {
         PriorityQueue<Vertex> queue = new PriorityQueue();
         HashMap<Long, Vertex> visited = new HashMap();
         for (int i = 0; i < biconnected.size(); i++) {
@@ -433,7 +450,6 @@ public abstract class Node implements Comparable<Node> {
                 visited.put(u.getID(), v);
             }
         }
-        FHashSet<Node> solution = new FHashSet();
         while (queue.size() > 0) {
             Vertex first = queue.poll();
             while (first.hasNext()) {
@@ -465,7 +481,6 @@ public abstract class Node implements Comparable<Node> {
                 }
             }
         }
-        return solution;
     }
 
     private ArrayList<Node> getNextBidirectionalEdges(Cluster cluster) {
